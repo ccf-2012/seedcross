@@ -15,7 +15,7 @@ class ParamSettingForm(forms.Form):
 
     jackett_url = forms.URLField(label='Jackett Url')
     jackett_api_key = forms.CharField(label='Jackett Api key')
-    jackett_trackers = forms.CharField(label='Trackers / Indexers',  required=False)
+    jackett_trackers = forms.CharField(label='Tracker / Indexer',  required=False)
     fc_count = forms.IntegerField(label='Flow control: Count limit')
     fc_interval = forms.IntegerField(label='Flow control: Interval')
 
@@ -29,7 +29,7 @@ class ParamSettingForm(forms.Form):
             'client_type',
             Row(
                 Column(Field('client_host',
-                             placeholder='IP addr of the download client'),
+                             placeholder='only IP addr'),
                        css_class='form-group col-md-8 mb-0'),
                 Column(PrependedText('client_port', ':', placeholder="Port"),
                        css_class='form-group col-md-4 mb-0'),
@@ -46,17 +46,15 @@ class ParamSettingForm(forms.Form):
             Field('jackett_url',
                   placeholder='ex. http://jackett.server.ip:9117/'),
             Field('jackett_api_key',
-                  placeholder='get it from your Jackett web ui'),
+                  placeholder='copy from Jackett web ui'),
             Field('jackett_trackers',
-                  placeholder='leave blank to search all indexers in Jackett '),
+                  placeholder='leave blank to search all configured indexers'),
             HTML("""
             <p><strong>Flow Control Setting</strong></p>
             """),
-            Row(Column(Field('fc_count',
-                             placeholder='count limit for one click'),
+            Row(Column(Field('fc_count'),
                        css_class='form-group col-md-6 mb-0'),
-                Column(Field('fc_interval',
-                             placeholder='seconds between 2 queries'),
+                Column(Field('fc_interval'),
                        css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'))
         self.helper.add_input(
