@@ -140,7 +140,6 @@ MAX_ATTEMPTS = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -156,7 +155,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'WARNING',
             'propagate': False,
         },
     },
