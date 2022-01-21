@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class="row" style="width: 48rem;">
+    <div class="card-body">
+        <h4 class="card-title">修改下载器 : {{object.name}}</h4>
+        <h6 class="card-subtitle mb-2 text-muted">修改下载器的信息</h6>
+
+        <form method="post">
+            {% csrf_token %}
+            {% include '_form.html' %}
+            <a class="btn btn-outline-secondary" href="javascript:history.go(-1)">取消</a>
+            <button type="submit" class="btn btn-success">确认修改</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

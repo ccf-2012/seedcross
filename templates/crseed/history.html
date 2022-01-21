@@ -1,0 +1,54 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block stylesheet %}
+<link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/jquery.dataTables.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="row mx-3">
+    <span class="ml-3 mt-4 mr-auto">
+        <h4>Search History</h4>
+    </span>
+    <!-- <a href="{% url 'cs_clear_history' %}" class="btn  btn-danger mr-3 my-3 ">Clear Searched History</a> -->
+</div>
+
+<div class="row mx-3">
+
+    <div class="table-responsive my-3">
+        <table id="datatable" width="100%" class="table  display cell-border">
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block script%}
+<script type="text/javascript" src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+<script type="text/javascript" charset="utf8" src="{% static 'js/jquery.dataTables.js' %}"></script>
+
+<script language="javascript">
+
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.init({
+        });
+        AjaxDatatableViewUtils.initialize_table(
+            $('#datatable'),
+            "{% url 'cs_historytable' %}",
+            {
+                // extra_options (example)
+                processing: false,
+                autoWidth: true,
+                full_row_select: false,
+                scrollX: true,
+				searching: true, paging: true, info: false           
+            },
+        );
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,228 @@
+
+/* gen w. https://work.smarchal.com/twbscolor/4.0.0/css/005243033e34ecf0f1a5e3f01 */
+.navbar-default {
+	background-color: #005243;
+	border-color: #033e34;
+  }
+  .navbar-default .navbar-brand {
+	color: #ecf0f1;
+  }
+  .navbar-default .navbar-brand:hover,
+  .navbar-default .navbar-brand:focus {
+	color: #bfe7f0;
+  }
+  .navbar-default .navbar-text {
+	color: #ecf0f1;
+  }
+  .navbar-default .navbar-nav > li > a {
+	color: #ecf0f1;
+  }
+  .navbar-default .navbar-nav > li > a:hover,
+  .navbar-default .navbar-nav > li > a:focus {
+	color: #bfe7f0;
+  }
+  .navbar-default .navbar-nav > li > .dropdown-menu {
+	background-color: #005243;
+  }
+  .navbar-default .navbar-nav > li > .dropdown-menu > li > a {
+	color: #ecf0f1;
+  }
+  .navbar-default .navbar-nav > li > .dropdown-menu > li > a:hover,
+  .navbar-default .navbar-nav > li > .dropdown-menu > li > a:focus {
+	color: #bfe7f0;
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-nav > li > .dropdown-menu > li.divider {
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-nav .open .dropdown-menu > .active > a,
+  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,
+  .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+	color: #bfe7f0;
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-nav > .active > a,
+  .navbar-default .navbar-nav > .active > a:hover,
+  .navbar-default .navbar-nav > .active > a:focus {
+	color: #bfe7f0;
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-nav > .open > a,
+  .navbar-default .navbar-nav > .open > a:hover,
+  .navbar-default .navbar-nav > .open > a:focus {
+	color: #bfe7f0;
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-toggle {
+	border-color: #033e34;
+  }
+  .navbar-default .navbar-toggle:hover,
+  .navbar-default .navbar-toggle:focus {
+	background-color: #033e34;
+  }
+  .navbar-default .navbar-toggle .icon-bar {
+	background-color: #ecf0f1;
+  }
+  .navbar-default .navbar-collapse,
+  .navbar-default .navbar-form {
+	border-color: #ecf0f1;
+  }
+  .navbar-default .navbar-link {
+	color: #ecf0f1;
+  }
+  .navbar-default .navbar-link:hover {
+	color: #bfe7f0;
+  }
+  
+  @media (max-width: 767px) {
+	.navbar-default .navbar-nav .open .dropdown-menu > li > a {
+	  color: #ecf0f1;
+	}
+	.navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
+	.navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+	  color: #bfe7f0;
+	}
+	.navbar-default .navbar-nav .open .dropdown-menu > .active > a,
+	.navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,
+	.navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+	  color: #bfe7f0;
+	  background-color: #033e34;
+	}
+  }
+/* gen w. https://work.smarchal.com/twbscolor/css/ */
+
+.navbar{
+	font-size: 16px;
+	min-height: 60px;
+    /* margin-top: 15px; */
+    /* margin-bottom: 15px; */
+}
+
+.navbar-brand{
+    height: 50px;
+    padding: 10px 10px;
+    font-size: 20px;	
+}
+
+
+/* styls for list.html */
+.list-background-color{
+	background-color: #007bbb;
+}
+
+.list-border-color{
+	border-color: #007bbb;
+}
+
+.container {
+  	width: 88%;
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+
+.form-title {
+	border-bottom: 1px solid;
+	padding: 15px 5px;
+	text-align: center;
+	color: white;
+}
+
+.title-main-size {
+    font-size: 20px;
+}
+
+.oppanel{
+	width: 600px;
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+
+
+/* for table */
+.content {
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 15px;
+	border-radius: 4px;
+	border: 1px solid;
+	box-sizing: border-box;
+}
+
+.lable {
+	display: inline-block;
+	margin-bottom: 5px;
+	font-weight: 700;
+}
+
+.laoye-table{
+	width: 100%;
+	border-collapse:collapse;
+}
+
+.t {
+	text-align: left;
+	padding: 10px;
+	border-width: 2px;
+	border-style: solid;
+}
+
+.th {
+	color: #FFFFFF;
+	border-width: 2px;
+	border-style: solid;
+}
+
+.textarea {
+	width: 400px;
+	height: 30px;
+	line-height: 30px; 
+	text-align: left; 
+	color: black; 
+	font-weight: 500; 
+	border: 1px solid;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.form-item {
+	margin-bottom: 15px;
+}
+.show-grid {
+	margin-bottom: 15px;
+}
+.show-grid [class^="col-"] {
+padding-top: 10px;
+padding-bottom: 10px;
+background-color: #eee;
+background-color: rgba(86,61,124,.15);
+border: 1px solid #ddd;
+border: 1px solid rgba(86,61,124,.2);
+}
+  
+  
+.btn-background {background-color:#005243;}
+.btn-white {color:#ffffff;}
+
+/* styles for checklog */
+.checklog-background-color{
+	background-color: #005243;
+}
+
+
+.checklog-disable-color{
+	/* color: #005243; */
+	background-color: Gray;
+}
+
+.checklog-border-color{
+	border-color: #005243;
+}
+
+  

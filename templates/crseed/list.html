@@ -1,0 +1,141 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block stylesheet %}
+<link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/jquery.dataTables.css' %}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="row mx-3">
+        <div class="ml-3 mt-4 mr-auto">
+            <a href="{% url 'cs_start' %}" class="btn  btn-primary ">Start Cross Seed</a>
+        </div>
+        <div class="mr-3 my-3">
+            <!-- <button type="button" id="clearRecBtn" class="btn btn-danger">Clear Records</button> -->
+            <a href="{% url 'cs_clearcrossed' %}"  id="clearRecBtn" class="btn  btn-info ">Clear records</a>
+        </div>
+    </div>
+
+    <div classs="row my-1" id="list_contents">
+        {% include 'crseed/logdiv.html' %}
+    </div>
+
+
+    <div class="row mx-3">
+        <div class="col">
+            <table class="table table-sm display" id="actor_datatable" style="width:100%">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col" style="width: 5%;">Added </th>
+                        <th scope="col" style="width: 24%;">Torrent Name</th>
+                        <!-- <th scope="col" style="width: 6%;">size</th> -->
+                        <th scope="col" style="width: 6%;">Tracker</th>
+                        <th scope="col" style="width: 6%;">Cross with</th>
+                        <th scope="col" style="width: 9%;">Location</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block script%}
+<script type="text/javascript" src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+<script type="text/javascript" charset="utf8" src="{% static 'js/jquery.dataTables.js' %}"></script>
+
+
+<script>
+
+    var table = $('#actor_datatable').DataTable({
+        "createdRow": function (row, data, dataIndex) {
+            if (data.fields.name == data.fields.crossed_with) {
+                // $(row).addClass('grayed');
+                $('td', row).css('background-color', 'LightGreen');
+            }
+        },
+        "dom": '<"top"r>ft<"bottom">pl',
+        // '<"top"i>rt<"bottom"flp><"clear">',
+        "ajax": {
+            // "url": "/static/data/data1.json",
+            "url": "{% url 'actor_table_ajax' %}",
+            "dataSrc": ""
+        },
+        "order": [0, 'desc'],
+        "lengthMenu": [20, 50],
+        "columns": [
+            {
+                "data": "fields.added_date",
+                // "render": function (data) {
+                //     var date = new Date(data);
+                //     var month = date.getMonth() + 1;
+                //     return date.getFullYear() +'/'+ (month.toString().length > 1 ? month : "0" + month) + "/" + date.getDate() + " " +date.getHours()+':'+date.getMinutes()+':'+date.getSeconds() ;
+                // }
+            },
+            { "data": "fields.name" },
+            { "data": "fields.tracker" },
+            // { "data": "fields.size" },
+            { "data": "fields.crossed_with" },
+
+            { "data": "fields.location" }
+
+        ]
+    });
+
+    var data_id = 0;
+    (function worker() {
+        $.ajax({
+            url: '/crseed/processlog',
+            success: function (data) {
+                // $('#list_contents').html(data);
+                $('#clientCount').html( data[0].fields.total_in_client + ' / ' + data[0].fields.progress)
+                $('#sessionCount').html( data[0].fields.flow_limit + ' / ' + data[0].fields.query_count)
+                $('#downloadCount').html( data[0].fields.download_count)
+
+                if ($('#logMessage').length > 0) {
+                    var logbox = $('#logMessage');
+                    // console.log(logbox)
+                    logbox.append(data[0].fields.log_message)
+                    logbox.scrollTop(logbox[0].scrollHeight);
+                }
+                table.ajax.reload();
+                setTimeout(worker, 2000);
+            },
+            error: function() {
+                clearTimeout(worker);
+            },
+            complete: function () {
+            }
+        });
+    })();
+
+
+    $(function () {
+    $('#abortBtn').on('click', function () {
+        $.ajax({
+            url: "{% url 'cs_cancel_tasks' %}",
+        });
+    });
+    });
+
+    // $(function () {
+    // $('#clearRecBtn').on('click', function () {
+    //     r = confirm("Are you sure?");
+    //     if (r) {
+    //         $.ajax({
+    //             url: "{% url 'cs_clearcrossed' %}",
+    //         });
+    //     }
+    // });
+    // });
+
+</script>
+
+
+
+{% endblock %}

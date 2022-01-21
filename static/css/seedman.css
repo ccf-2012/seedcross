@@ -1,0 +1,14 @@
+.table-condensed{
+	font-size: 10px;
+  }
+
+
+
+  .red {
+    background-color: red !important;
+  }
+
+
+.green {
+  background-color: rgb(0, 255, 64) !important;
+}

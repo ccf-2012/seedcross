@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}SeedCross{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/seedman.css' %}">
+  <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" />
+  {% block stylesheet %}{% endblock %}
+</head>
+
+<body>
+  <div class="container-fluid">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="{% url 'cs_list' %}">
+        <img src="{% static 'brand/seedman-solid.png' %}" width="30" height="30" class="d-inline-block align-top"
+          alt="">
+        SeedCross
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        {% if user.is_authenticated %}
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="{% url 'cs_setting' %}">Settings</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link " href="{% url 'cs_list' %}">Start Crossing</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav mr-sm-2">
+          <li class="nav-item dropdown ">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" >
+              History
+            </a>
+            <ul class="dropdown-menu " aria-labelledby="userMenu">
+              <li> <a class="dropdown-item" href="{% url 'cs_history' %}">Searched History</a> </li>
+                <li class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'cs_clear_history' %}">Clear Searched History</a></li>
+          </ul>
+          </li>
+          <li class="nav-item dropdown ">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" >
+              {{ user.username }}<span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu " >
+              <li><a class="dropdown-item" href="{% url 'password_change' %}">Modify Password</a></li>
+              <li class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+        {% else %}
+        <ul class="navbar-nav mr-sm-2">
+          <li class="nav-item active"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+        </ul>
+        {% endif %}
+      </div>
+    </nav>
+
+  </div>
+
+
+  <div class="container-fluid">
+
+    {% block content %}
+    {% endblock %}
+  </div>
+
+
+  <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('li.active').removeClass('active');
+      $('a[href="' + location.pathname + '"]').closest('li').addClass('active');
+    });
+
+
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+
+    var backgroundColorList = [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(255, 206, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(255, 159, 64, 0.2)'
+    ];
+    var borderColorList = [
+      'rgba(255, 99, 132, 1)',
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)'
+    ];
+
+  </script>
+
+  {% block script %}
+  {% endblock script %}
+
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div>
+
+<div class="row mx-3">
+    <span class="ml-3 mt-4 mr-auto" ><h4>Settings</h4></span>  
+</div>
+
+<div class="row my-3 justify-content-center">
+    <div class="col-sm-8 ">
+            {% crispy form %}
+
+    </div>
+</div>
+</div>
+
+{% endblock %}

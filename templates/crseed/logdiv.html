@@ -1,0 +1,33 @@
+{% if log_data.live %}
+<div class="row my-3 justify-content-md-center">
+    <div class="col-9">
+        <div class="row  mx-3 text-center">
+            <div class="col " >
+                <h4 id="clientCount">- / -</h4><span
+                    style="margin-left:6px;font-size:10px;font-weight:normal;color:#888">Total/Searched</span>
+            </div>
+            <div class="col " >
+                <h4 id="sessionCount">- / -</h4><span
+                    style="margin-left:6px;font-size:10px;font-weight:normal;color:#888">Flow-Limit/session Searched</span>
+            </div>
+            <div class="col " >
+                <h4 id="downloadCount">-</h4><span
+                    style="margin-left:6px;font-size:10px;font-weight:normal;color:#888">session Downloaded</span>
+            </div>
+            <div class="col " >
+                <button type="button" id="abortBtn" class="btn btn-danger">Cancel</button>
+            </div>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" style="font-size:10px;color:#888;height: 140px"
+                placeholder="Wait for the cross seeding task to start ......" id="logMessage"></textarea>
+        </div>
+    </div>
+
+</div>
+
+{% else %}
+<div class="row justify-content-md-center">
+
+</div>
+{% endif %}
