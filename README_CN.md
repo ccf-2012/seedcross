@@ -3,6 +3,7 @@
 * 对下载器(Deluge/qBittorrent/Transmission)中的种子，通过Jackett在各外站上寻找匹配的种子，以暂停状态加入到下载器，供进一步检查完成辅种
 * 参考 [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
+![screenshot](screenshot/seedcross1.png)
 
 ## 前置条件
 * [Jackett](https://github.com/Jackett/Jackett) : 外站众多，形态各异，Jackett作了相对统一的适配，因此，这里通过 Jackett 进行种子搜索。如果你还没有安装，可参考：[这里](https://github.com/ccf-2012/ptnote/blob/main/CrossSeed.md#jackett-%E5%AE%89%E8%A3%85)

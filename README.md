@@ -2,6 +2,8 @@
 * A Web app to Cross-Seed torrents in Deluge/qBittorrent/Transmission
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
+![screenshot](screenshot/seedcross1.png)
+
 ## Require
 * [Jackett](https://github.com/Jackett/Jackett) 
 * Deluge/qBittorrent/Transmission
