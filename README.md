@@ -1,5 +1,5 @@
 # SeedCross
-* A Web app to cross-seeding torrents in Deluge/qBittorrent/Transmission
+* A Web app to Cross-Seed torrents in Deluge/qBittorrent/Transmission
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
 ## Require
@@ -8,26 +8,25 @@
 * Docker
   
 ## Installation
-It's published in DockHub, you may start with:
-
 ```sh
 docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 ```
 
 ## Login
-1. open `http://<your-ip>:8019` in browser, login with `admin:admin`
+1. open `http://<your-ip>:8019` in browser
+2. login with `admin:admin`
 
 ## Settings
 * Start from `Settings` tab, fill the fields carefully:
- 1. Download Client Setting: 
-    1. `Type`, `Host`, `Port`, `Username`, `Password` as usual, note the `Host` must be an IP address, not url.
- 2. Jackett Setting: 
-    1. you should have started a proper configured Jackett server, thus you can get the  `Jackett Url` and `Jackett Api key`, 
-    2. Trackers / Indexers in Jackett: the only optional field, leave it blank if you would seach all the trackers; when you want to search specific tracker, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett
- 3. Flow Control Setting: 
-    1. Flow control: Count limit: every search query will lead load to the tracker server, limit this count as your own wish,  seedcross will manage the search history and find the next un-searched torrent when you start cross-seeding next time.
-    2. Flow control: Interval: time delay between 2 search query.
- 4. After you fill the form, press `Save Settings`, if no error detected, it will redirect to the `Start Cross` page, otherwise there will be error message next to the field.
+1. Download Client Setting: 
+  1. `Type`, `Host`, `Port`, `Username`, `Password` as usual, note the `Host` must be an IP address, not url.
+2. Jackett Setting: 
+  2. you should have started a proper configured Jackett server, thus you can get the  `Jackett Url` and `Jackett Api key`, 
+  3. Trackers / Indexers in Jackett: the only optional field, leave it blank if you would seach all the trackers; when you want to search specific tracker, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett
+3. Flow Control Setting: 
+  4. Flow control: Count limit: every search query will lead load to the tracker server, limit this count as your feel safe, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
+  5. Flow control: Interval: time delay between 2 search query.
+4. After you fill the form, press `Save Settings`, if no error detected, it will redirect to the `Start Cross` page, otherwise there will be error message next to the field.
 
 ## Start Crossing
 * press `Start Cross` button, seedcross will start to:
@@ -56,11 +55,13 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 * but when you add new trackers you may want to redo the search, click the `Clear Search History` will delete all the records.
 
 ## Plans
-* filename/folder hardlink tweaks to get more crossed.
-* open to you Dai-lo(s) suggestions.
+* Scheduler to run the task periodically
+* Seperate tracker to search for different media
+* Hardlink tweaks of file/folder to get more crossed.
+* Open to you Dai-lo(s) suggestions.
 
 
 ## Acknowledgement
-1. aruba@hutongyouwu 
+1. Aruba@hutongyouwu 
 2. [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 

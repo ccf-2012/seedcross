@@ -256,8 +256,9 @@ def ajaxRefreshProcessLog(request):
         fields=('live', 'total_in_client', 'flow_limit', 'progress',
                 'query_count', 'match_count', 'download_count', 'log_message'))
     # log.refresh_from_db()
-    log.log_message = ''
-    log.save()
+    if len(log.log_message) > 0:
+        log.log_message = ''
+        log.save()
     return HttpResponse(data, content_type="application/json")
 
 
