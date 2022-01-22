@@ -58,9 +58,9 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 
 ## Plans
 * Scheduler to run the task periodically
-* Seperate tracker to search for different media
+* Seperate tracker to search different media
 * Hardlink tweaks of file/folder to get more crossed.
-* Open to you Dai-lo(s) suggestions.
+* Open to you Dai-lo's suggestions.
 
 
 ## Acknowledgement
