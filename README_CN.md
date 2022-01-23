@@ -35,7 +35,7 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 4. 填完上述信息后，点击 `Save Settings`, 明显的错误如url/ip格式不符，界面会停在设置页面，并有错误信息提示，否则就会转到 `Start Cross` 页面。
 
 ## Start Crossing
-* 点击 `Start Cross` 按钮, SeedCross就会开始:
+1. 点击 `Start Cross` 按钮, SeedCross就会开始:
     1. 从下载器中读入种子
     2. 解析种子名字以获得 title,year,episode 等， 以这些信息通过Jackett去到各站进行搜索
     3. 对搜索结果进行筛选
@@ -44,21 +44,45 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 * 含有 CJK 字符和种子将不会提交搜索
 * 如果点击 `Start Cross` 按钮时，还没有设置好必要信息，就会转到 `Settings` 页. 
 
-*  在处理过程中，会显示一个进度面板，其中包括:
+2.  在处理过程中，会显示一个进度面板，其中包括:
   * Total/Searched: 在下载器中的种子总数 / 到现在已经处理的种子数，包括跳过的
   * Flow-Limit/Searched of this session: 你所设置的流控数量 / 本次搜索已经发起的查询次数
   * Downloaded torrent in this session：本次搜索中，找到的匹配。需要说明的是，如果你已经对这批种子作过多次辅种，有可能找到的匹配是已经在下载器中了，所以这里的列表和下载器中不一定会一一对应
   * 有一个滚动的 text box 显示 info/error 消息。这消息就用来看看的，出现错误时可以试着猜猜发生了什么，如果刷新页面，前面的消息是会消失的
 
-* 一次辅种处理过程将会在下列情况停止:
+3. 一次辅种处理过程将会在下列情况停止:
   * 配置错误：下载器连不上，下载器登陆密码错，Jackett地址错或Api key填错
   * 查询次数达到 Flow limit count
   * 下载器中的种子已经全部遍历
+  * 用户点击了 Cancel 按钮
 * 如果没有活动的cross任务，进度面板在页面刷新时会消失
 
 ## Search History
 * 查过的种子会被存在一个History表中，这些种子在下次查询时将会跳过，即使你已经开始在另一个下载器进行辅种查询.
 * 如果你又收了个新站，你可能会想重新进行搜索，点击菜单中的 `Clear Search History` 就会删除所有记录.
+
+## 数据库备份与恢复
+* 有些麻烦预警
+1. 先进入docker后台，把db拷出一份到 `/backup`
+```sh
+docker exec -it seedcross /bin/bash
+
+
+mkdir /backup
+cp -R /code/seedcross/db /backup/ 
+```
+2. 停止docker，将`/backup` 映射出来，比如映射到 `/volume1/docker/backup`
+3. 再启动docker，就可以主机中的 `/volume1/docker/backup` 看到 `db` 目录，备份这个目录
+
+* 更新docker后恢复数据 
+1. 重新 pull 了新image后，在建 container时要映射一个目录到主机
+2. 备份的数据拷到这个目录
+3. 然后将备份的目录拷到程序目录中替换
+```
+docker exec -it seedcross /bin/bash
+
+cp -R /backup/db  /code/seedcross/
+```
 
 ## 近期计划
 * Scheduler: 实现定期运行，就像iyuu那样

@@ -23,21 +23,11 @@
 
 
     <div class="row mx-3">
-        <div class="col">
-            <table class="table table-sm display" id="actor_datatable" style="width:100%">
-                <thead class="thead-light">
-                    <tr>
-                        <th scope="col" style="width: 5%;">Added </th>
-                        <th scope="col" style="width: 24%;">Torrent Name</th>
-                        <!-- <th scope="col" style="width: 6%;">size</th> -->
-                        <th scope="col" style="width: 6%;">Tracker</th>
-                        <th scope="col" style="width: 6%;">Cross with</th>
-                        <th scope="col" style="width: 9%;">Location</th>
-                    </tr>
-                </thead>
+        <div class="table-responsive my-3">
+            <table id="datatable" width="100%" class="table  display cell-border">
             </table>
         </div>
-
+    
     </div>
 </div>
 
@@ -52,41 +42,40 @@
 
 <script>
 
-    var table = $('#actor_datatable').DataTable({
-        "createdRow": function (row, data, dataIndex) {
-            if (data.fields.name == data.fields.crossed_with) {
-                // $(row).addClass('grayed');
-                $('td', row).css('background-color', 'LightGreen');
-            }
-        },
-        "dom": '<"top"r>ft<"bottom">pl',
-        // '<"top"i>rt<"bottom"flp><"clear">',
-        "ajax": {
-            // "url": "/static/data/data1.json",
-            "url": "{% url 'actor_table_ajax' %}",
-            "dataSrc": ""
-        },
-        "order": [0, 'desc'],
-        "lengthMenu": [20, 50],
-        "columns": [
+$(document).ready(function () {
+        AjaxDatatableViewUtils.init({
+        });
+        AjaxDatatableViewUtils.initialize_table(
+            $('#datatable'),
+            "{% url 'cs_listtable' %}",
             {
-                "data": "fields.added_date",
-                // "render": function (data) {
-                //     var date = new Date(data);
-                //     var month = date.getMonth() + 1;
-                //     return date.getFullYear() +'/'+ (month.toString().length > 1 ? month : "0" + month) + "/" + date.getDate() + " " +date.getHours()+':'+date.getMinutes()+':'+date.getSeconds() ;
-                // }
+                // extra_options (example)
+                processing: false,
+                autoWidth: true,
+                full_row_select: false,
+                scrollX: true,
+				searching: true, paging: true, info: false           
             },
-            { "data": "fields.name" },
-            { "data": "fields.tracker" },
-            // { "data": "fields.size" },
-            { "data": "fields.crossed_with" },
-
-            { "data": "fields.location" }
-
-        ]
+        );
     });
 
+    // "createdRow": function (row, data, dataIndex) {
+    //         if (data.fields.name == data.fields.crossed_with) {
+    //             // $(row).addClass('grayed');
+    //             $('td', row).css('background-color', 'LightGreen');
+    //         }
+    //     },
+
+
+    var table = $("#datatable").closest('table.dataTable');
+    $('#datatable').on('rowCallback', function(event, table, row, data ) {
+        // console.log(data);
+        if (data.name == data.crossed_with){
+            // $(row).addClass('reen') 
+            $('td', row).css('background-color', 'LightGreen');
+        }
+        // $(row).addClass(data.read ? 'read' : 'unread');
+    })
     var count = 0;
     (function worker() {
         $.ajax({
@@ -99,13 +88,14 @@
 
                 if ($('#logMessage').length > 0) {
                     var logbox = $('#logMessage');
-                    // console.log(logbox)
                     logbox.append(data[0].fields.log_message)
                     logbox.scrollTop(logbox[0].scrollHeight);
                 }
                 count = (count + 1) % 3
                 if (count == 0){
-                    table.ajax.reload(null, false);
+                    // console.log('reload called.')
+                    $('#datatable').DataTable().ajax.reload(null, false);
+                    //table.ajax.reload(null, false);
                 }
                 setTimeout(worker, 2000);
             },

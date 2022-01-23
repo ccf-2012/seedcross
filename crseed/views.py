@@ -124,9 +124,11 @@ def cancelTasks(request):
 class CrossedTorrentTable(AjaxDatatableView):
     model = CrossTorrent
     title = 'Crossed torrents'
+    show_column_filters = False
     initial_order = [
         ["added_date", "desc"],
     ]
+    length_menu = [[30, 50], [30, 50]]
     column_defs = [
         {
             'name': 'added_date',
@@ -138,7 +140,7 @@ class CrossedTorrentTable(AjaxDatatableView):
             'name': 'name',
             'visible': True,
             'title': 'Torrent Name',
-            'searchable': False,
+            'searchable': True,
         },
         {
             'name': 'sizeStr',
@@ -148,9 +150,22 @@ class CrossedTorrentTable(AjaxDatatableView):
             'searchable': False,
         },
         {
+            'name': 'tracker',
+            'title': 'Tracker',
+            'visible': True,
+            'searchable': False,
+        },
+        {
             'name': 'crossed_with',
             'foreign_field': 'crossed_with__name',
-            'title': 'Crossed with',
+            'title': 'Crossed with (local)',
+            'visible': True,
+            'searchable': True,
+        },
+        {
+            'name': 'crossed_with_tracker',
+            'foreign_field': 'crossed_with__tracker',
+            'title': 'Tracker (local)',
             'visible': True,
             'searchable': False,
         },
@@ -227,23 +242,6 @@ def clearHistory(request):
 def clearCrossed(request):
     CrossTorrent.objects.all().delete()
     return redirect('cs_list')
-
-
-# https://stackoverflow.com/questions/55013865/django-serializer-queryset-and-retrieve-foreign-key-values
-# https://docs.djangoproject.com/en/3.2/topics/serialization/#natural-keys
-@login_required
-def ajaxRefreshTorrentList(request):
-    # breakpoint()
-    data = serializers.serialize("json",
-                                 CrossTorrent.objects.all(),
-                                 fields=('added_date', 'name', 'size',
-                                         'tracker', 'location',
-                                         'crossed_with'),
-                                 use_natural_foreign_keys=True,
-                                 use_natural_primary_keys=True)
-    response = HttpResponse(data, content_type="application/json")
-
-    return response
 
 
 @login_required

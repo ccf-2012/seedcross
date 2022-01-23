@@ -143,6 +143,10 @@ class Searcher:
             # older torrents' sizes in blutopia are are slightly off
             if result['Tracker'] == 'Blutopia':
                 max_size_difference *= 2
+            
+            m = re.match(local_release_data['tracker'], result['Tracker'], re.I)
+            if m:
+                continue
 
             if abs(result['Size'] -
                    local_release_data['size']) <= max_size_difference:
@@ -190,11 +194,12 @@ class Searcher:
     #         json.dump([target_dict], f, indent=4)
 
 
-def genSearchKeyword(basename, size, log):
+def genSearchKeyword(basename, size, tracker, log):
     local_release_data = {
         'basename': basename,
         'size': size,
-        'guessed_data': guessit(basename)
+        'guessed_data': guessit(basename),
+        'tracker': tracker
     }
 
     if local_release_data['guessed_data'].get('title') is None:
@@ -290,7 +295,7 @@ def iterTorrents(dlclient, process_param, log):
             continue
 
         dbSearchTor = saveSearchedTorrent(localTor)
-        searchData = genSearchKeyword(localTor.name, localTor.size, log)
+        searchData = genSearchKeyword(localTor.name, localTor.size, localTor.tracker, log)
         if not searchData:
             continue
         
