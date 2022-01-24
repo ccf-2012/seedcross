@@ -33,9 +33,9 @@ services:
 * Start from `Settings` tab, fill the fields carefully:
 1. Download Client Setting: 
    1. `Type`, `Host`, `Port`, `Username`, `Password` as usual, note the `Host` must be an IP address, not url.
-2. Jackett Setting: 
-   1. you should have started a proper configured Jackett server, thus you can get the  `Jackett Url` and `Jackett Api key`, 
-   2. Trackers / Indexers in Jackett: Lleave blank if you would seach all the trackers; when you want to search specific tracker, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett; for Prowlarr, it's an integer number, find it from the indexer info.
+2. Jackett/Prowlarr Setting: 
+   1. you should have started a proper configured Jackett/Prowlarr server, thus you can get the  `Jackett/Prowlarr Url` and `Jackett/Prowlarr Api key`, 
+   2. Trackers / Indexers: Leave blank if you would seach all the trackers; when you want to search specific trackers, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett; for Prowlarr, it's an integer number, find it from the indexer info.
 3. Flow Control Setting: 
    1. Flow control: Count limit: every search query will lead load to the tracker server, limit this count as your feel safe, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
    2. Flow control: Interval: time delay between 2 search query.

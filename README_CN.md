@@ -36,9 +36,9 @@ services:
 * 首先进`Settings`页面，这里的每个参数都要小心填写：
 1. Download Client Setting: 
   * 下载器的 `Type`, `Host`, `Port`, `Username`, `Password` , 注意 `Host` 都是IP地址，而不是带 `http://` 和端口的 url。
-2. Jackett Setting: 
-  * `Jackett Url` 填写 `http://<server ip>:<port>/`, 即前面有`http://` 后面到 端口号 为止, 打开你已经配置好的 Jackett 网页，拷贝右上角的 `Jackett Api key`
-  * Trackers / Indexers in Jackett: 留空就会搜索全部配置的tracker。如果你想只搜单个tracker, 这里要填的就是在Jackett中 `torznab feed URL` 里面 `indexers/` 和 `/results` 中间那个单词。对于Prowlarr，这里要填的是数字，在Indexer info里可以找到。
+2. Jackett/Prowlarr Setting: 
+  * `Jackett/Prowlarr Url` 填写 `http://<server ip>:<port>/`, 即前面有`http://` 后面到 端口号 为止, 打开你已经配置好的 Jackett 网页，拷贝右上角的key拷到 `Jackett/Prowlarr Api key`
+  * Trackers / Indexers in Jackett: 留空就会搜索全部配置的tracker。如果你想只搜某几个tracker, 这里要填的就是在Jackett中 `torznab feed URL` 里面 `indexers/` 和 `/results` 中间那个单词，用,分隔。对于Prowlarr，这里要填的是数字，在Indexer info里可以找到。
 3. Flow Control Setting: 
   * Flow control: Count limit: 如果你下载器中有几千种子，持续搜索将会对tracker服务器带来负担，所以把这个值设置为一个你觉得安全的上限。SeedCross会管理搜索的历史，下次搜索时会跳过那些已经搜过的种子。
   * Flow control: Interval: 查询间隔，每次查询之后暂停几秒。

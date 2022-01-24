@@ -42,7 +42,7 @@ class ParamSettingForm(forms.Form):
                        css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'),
             HTML("""
-            <p><strong>Jackett Setting</strong></p>
+            <p><strong>Jackett/Prowlarr Setting</strong></p>
             """),
             Field('jackett_prowlarr',
                   placeholder='Jackett or Prowlarr'),
