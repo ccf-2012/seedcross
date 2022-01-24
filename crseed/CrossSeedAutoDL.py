@@ -125,14 +125,16 @@ class Searcher:
             local_release_data['guessed_data'].get('episode')
         }
 
-        if self.process_param.trackers.strip():
-            optional_params['indexerIds'] = self.process_param.trackers
-
         for param, arg in optional_params.items():
             if arg is not None:
                 main_params[param] = arg
 
-        return base_url + urlencode(main_params)
+        if self.process_param.trackers.strip():
+            idlist = self.process_param.trackers.split(',')
+            indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+
+
+        return base_url + urlencode(main_params)+ '&'+indexerUrl
 
     # construct final search url
     def _get_jackett_search_url(self, search_query, local_release_data):
