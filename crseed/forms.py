@@ -1,5 +1,5 @@
 from django import forms
-from .models import CLIENT_TYPES
+from .models import CLIENT_TYPES, INDEXER_TYPES
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, HTML, Div
 from crispy_forms.bootstrap import PrependedText
@@ -13,8 +13,9 @@ class ParamSettingForm(forms.Form):
     client_password = forms.CharField(
         label='Password', widget=forms.PasswordInput(render_value=True))
 
-    jackett_url = forms.URLField(label='Jackett Url')
-    jackett_api_key = forms.CharField(label='Jackett Api key')
+    jackett_prowlarr = forms.ChoiceField(label='Jackett or Prowlarr', choices=INDEXER_TYPES)
+    jackett_url = forms.URLField(label='Jackett/Prowlarr Url')
+    jackett_api_key = forms.CharField(label='Jackett/Prowlarr Api key')
     jackett_trackers = forms.CharField(label='Tracker / Indexer',  required=False)
     fc_count = forms.IntegerField(label='Flow control: Count limit')
     fc_interval = forms.IntegerField(label='Flow control: Interval')
@@ -43,10 +44,12 @@ class ParamSettingForm(forms.Form):
             HTML("""
             <p><strong>Jackett Setting</strong></p>
             """),
+            Field('jackett_prowlarr',
+                  placeholder='Jackett or Prowlarr'),
             Field('jackett_url',
-                  placeholder='ex. http://jackett.server.ip:9117/'),
+                  placeholder='ex. http://jackett/prowlarr.server.ip:9117/'),
             Field('jackett_api_key',
-                  placeholder='copy from Jackett web ui'),
+                  placeholder='copy from jackett/prowlarr web ui'),
             Field('jackett_trackers',
                   placeholder='leave blank to search all configured indexers'),
             HTML("""

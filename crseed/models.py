@@ -7,6 +7,11 @@ CLIENT_TYPES = [
     ('de', 'deluge'),
 ]
 
+INDEXER_TYPES = [
+    (0, 'Jackett'),
+    (1, 'Prowlarr'),
+]
+
 
 class SearchedHistory(models.Model):
     torrent_id = models.BigAutoField(primary_key=True)
@@ -78,12 +83,14 @@ class TaskControl(models.Model):
 
 class ProcessParam(models.Model):
     process_id = models.BigAutoField(primary_key=True)
+    jackett_prowlarr = models.IntegerField(default=0, choices=INDEXER_TYPES)
     jackett_url = models.CharField(max_length=128)
     jackett_api_key = models.CharField(max_length=255)
     delay = models.IntegerField(default=5)
     trackers = models.CharField(max_length=255, default='', null=True)
     # progress = models.IntegerField(default=0)
     strict_size = models.BooleanField(default=False)
+    skip_CJK = models.BooleanField(default=True)
     fc_count = models.IntegerField(default=20)
     fc_interval = models.IntegerField(default=2)
 

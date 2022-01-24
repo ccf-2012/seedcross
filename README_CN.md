@@ -1,12 +1,12 @@
 # 外站辅种软件 SeedCross
 
-* 对下载器(Deluge/qBittorrent/Transmission)中的种子，通过Jackett在各外站上寻找匹配的种子，以暂停状态加入到下载器，供进一步检查完成辅种
+* 对下载器(Deluge/qBittorrent/Transmission)中的种子，通过Jackett/Prowlarr在各外站上寻找匹配的种子，以暂停状态加入到下载器，供进一步检查完成辅种
 * 参考 [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
 ![screenshot](screenshot/seedcross1.png)
 
 ## 前置条件
-* [Jackett](https://github.com/Jackett/Jackett) : 外站众多，形态各异，Jackett作了相对统一的适配，因此，这里通过 Jackett 进行种子搜索。如果你还没有安装，可参考：[这里](https://github.com/ccf-2012/ptnote/blob/main/CrossSeed.md#jackett-%E5%AE%89%E8%A3%85)
+* [Jackett](https://github.com/Jackett/Jackett) / [Prowlarr](https://github.com/Prowlarr/Prowlarr): 外站众多，形态各异，Jackett/Prowlarr 作了相对统一的适配，因此，这里通过 Jackett/Prowlarr 进行种子搜索。如果你还没有安装，可参考：[这里](https://github.com/ccf-2012/ptnote/blob/main/CrossSeed.md#jackett-%E5%AE%89%E8%A3%85)
 * Deluge/qBittorrent/Transmission：略
 * Docker：可以是任何支持Docker的环境，比如 nas，seedbox, 你的笔记本也行，它运行起来没什么负担
 
@@ -16,7 +16,17 @@
 docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 ```
 * 所需要的就是映射 `8019` 端口出来，以便浏览器访问。
-
+* 如果你需要 `docker-compose.yml`，这里是个例子：
+```yml
+version: "3"
+services:
+  seedcross:
+    container_name: seedcross
+    image: ccf2012/seedcross
+    ports:
+      - 8019:8019
+    restart: unless-stopped
+```
 
 ## 开始使用
 1. 浏览器中打开 `http://<your-ip>:8019` 
@@ -28,7 +38,7 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
   * 下载器的 `Type`, `Host`, `Port`, `Username`, `Password` , 注意 `Host` 都是IP地址，而不是带 `http://` 和端口的 url。
 2. Jackett Setting: 
   * `Jackett Url` 填写 `http://<server ip>:<port>/`, 即前面有`http://` 后面到 端口号 为止, 打开你已经配置好的 Jackett 网页，拷贝右上角的 `Jackett Api key`
-  * Trackers / Indexers in Jackett: 留空就会搜索全部配置的tracker。如果你想只搜单个tracker, 这里要填的就是在Jackett中 `torznab feed URL` 里面 `indexers/` 和 `/results` 中间那个单词。
+  * Trackers / Indexers in Jackett: 留空就会搜索全部配置的tracker。如果你想只搜单个tracker, 这里要填的就是在Jackett中 `torznab feed URL` 里面 `indexers/` 和 `/results` 中间那个单词。对于Prowlarr，这里要填的是数字，在Indexer info里可以找到。
 3. Flow Control Setting: 
   * Flow control: Count limit: 如果你下载器中有几千种子，持续搜索将会对tracker服务器带来负担，所以把这个值设置为一个你觉得安全的上限。SeedCross会管理搜索的历史，下次搜索时会跳过那些已经搜过的种子。
   * Flow control: Interval: 查询间隔，每次查询之后暂停几秒。

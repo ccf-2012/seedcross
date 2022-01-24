@@ -5,7 +5,7 @@
 ![screenshot](screenshot/seedcross1.png)
 
 ## Require
-* [Jackett](https://github.com/Jackett/Jackett) 
+* [Jackett](https://github.com/Jackett/Jackett) / [Prowlarr](https://github.com/Prowlarr/Prowlarr)
 * Deluge/qBittorrent/Transmission
 * Docker
   
@@ -13,10 +13,21 @@
 ```sh
 docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
 ```
+* if you need a `docker-compose.yml`, here's an example:
+```yml
+version: "3"
+services:
+  seedcross:
+    container_name: seedcross
+    image: ccf2012/seedcross
+    ports:
+      - 8019:8019
+    restart: unless-stopped
+```
 
 ## Login
 1. open `http://<your-ip>:8019` in browser
-2. login with `admin:admin`
+2. login with `admin`:`admin`
 
 ## Settings
 * Start from `Settings` tab, fill the fields carefully:
@@ -24,7 +35,7 @@ docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
    1. `Type`, `Host`, `Port`, `Username`, `Password` as usual, note the `Host` must be an IP address, not url.
 2. Jackett Setting: 
    1. you should have started a proper configured Jackett server, thus you can get the  `Jackett Url` and `Jackett Api key`, 
-   2. Trackers / Indexers in Jackett: the only optional field, leave it blank if you would seach all the trackers; when you want to search specific tracker, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett
+   2. Trackers / Indexers in Jackett: Lleave blank if you would seach all the trackers; when you want to search specific tracker, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett; for Prowlarr, it's an integer number, find it from the indexer info.
 3. Flow Control Setting: 
    1. Flow control: Count limit: every search query will lead load to the tracker server, limit this count as your feel safe, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
    2. Flow control: Interval: time delay between 2 search query.

@@ -34,6 +34,7 @@ def settingsView(request):
     if request.method == "POST":
         form = ParamSettingForm(request.POST)
         if form.is_valid():
+            config.jackett_prowlarr = form.cleaned_data['jackett_prowlarr']
             config.jackett_url = form.cleaned_data['jackett_url']
             config.jackett_api_key = form.cleaned_data['jackett_api_key']
             config.trackers = form.cleaned_data['jackett_trackers']
@@ -59,6 +60,7 @@ def settingsView(request):
             "client_port": client.port,
             "client_username": client.username,
             "client_password": client.password,
+            "jackett_prowlarr": config.jackett_prowlarr,
             "jackett_url": config.jackett_url,
             "jackett_api_key": config.jackett_api_key,
             "jackett_trackers": config.trackers,
