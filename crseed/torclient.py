@@ -217,8 +217,8 @@ class QbDownloadClient(DownloadClientBase):
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
                     is_paused=True,
-                    download_path=download_location,
-                    use_download_path=True)
+                    save_path=download_location,
+                    download_path=download_location )
                 if 'OK' in result.upper():
                     qbTor = self.findJustAdded()
                     if qbTor:
