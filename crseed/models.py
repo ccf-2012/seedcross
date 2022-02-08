@@ -91,6 +91,12 @@ class ProcessParam(models.Model):
     # progress = models.IntegerField(default=0)
     strict_size = models.BooleanField(default=False)
     skip_CJK = models.BooleanField(default=True)
+    category_indexers = models.BooleanField(default=False)
+    indexer_movietv = models.CharField(max_length=255, default='', null=True)
+    indexer_music = models.CharField(max_length=255, default='', null=True)
+    indexer_audio = models.CharField(max_length=255, default='', null=True)
+    indexer_ebook = models.CharField(max_length=255, default='', null=True)
+    indexer_other = models.CharField(max_length=255, default='', null=True)
     fc_count = models.IntegerField(default=20)
     fc_interval = models.IntegerField(default=2)
 
