@@ -19,7 +19,7 @@ class ParamSettingForm(forms.Form):
     indexer_music = forms.CharField(label='Music indexers',  required=False)
     indexer_ebook = forms.CharField(label='eBook indexers',  required=False)
     indexer_audio = forms.CharField(label='Audio indexers',  required=False)
-    indexer_other = forms.CharField(label='Other indexers',  required=False)
+    indexer_other = forms.CharField(label='Other(Unknown) indexers',  required=False)
     jackett_prowlarr = forms.ChoiceField(label='Jackett or Prowlarr', choices=INDEXER_TYPES)
     jackett_url = forms.URLField(label='Jackett/Prowlarr Url')
     jackett_api_key = forms.CharField(label='Jackett/Prowlarr Api key')

@@ -1,12 +1,7 @@
-from asyncio.streams import FlowControlMixin
 import json
 import logging
-from operator import index
-import os
 import re
-from django.utils import timezone
 import requests
-import shutil
 import time
 from guessit import guessit
 from urllib.parse import urlencode
@@ -63,7 +58,8 @@ class Searcher:
             return []
 
         if not search_url:
-            log.message('Skip, No indexer configured for [ {} ] category'.format(guess_cat))
+            log.message(
+                'Skip, No indexer configured for [ {} ] category'.format(guess_cat))
             return []
 
         logger.info(search_url)
@@ -103,7 +99,8 @@ class Searcher:
         if self.process_param.jackett_prowlarr == 0:
             if resp_json['Indexers'] == []:
                 info = 'ERROR: No results found due to incorrectly input indexer names ({}). Check ' \
-                       'your spelling/capitalization. Are they added to Jackett? Exiting...'.format(self.process_param.trackers)
+                       'your spelling/capitalization. Are they added to Jackett? Exiting...'.format(
+                           self.process_param.trackers)
                 print(info)
                 logger.info(info)
                 log.message(info, error_abort=1)
@@ -125,56 +122,57 @@ class Searcher:
             'query': search_query
         }
 
-        optional_params = {
-            'category':
-            Searcher.category_types[local_release_data['guessed_data']
-                                    ['type']],
-            'season':
-            local_release_data['guessed_data'].get('season'),
-            'episode':
-            local_release_data['guessed_data'].get('episode')
-        }
+        if categoryMovieTV(category):
+            optional_params = {
+                'category':
+                Searcher.category_types[local_release_data['guessed_data']
+                                        ['type']],
+                'season':
+                local_release_data['guessed_data'].get('season'),
+                'episode':
+                local_release_data['guessed_data'].get('episode')
+            }
 
-        for param, arg in optional_params.items():
-            if arg is not None:
-                main_params[param] = arg
+            for param, arg in optional_params.items():
+                if arg is not None:
+                    main_params[param] = arg
 
         indexerUrl = None
         if self.process_param.category_indexers and category:
-            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K', 'MovieDVD', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4K', 'MV']:
+            if categoryMovieTV(category):
                 if self.process_param.indexer_movietv.strip():
                     idlist = self.process_param.indexer_movietv.split(',')
-                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
-            elif category in ['Music']:
+                    indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
+            elif categoryMusic(category):
                 if self.process_param.indexer_music.strip():
                     idlist = self.process_param.indexer_music.split(',')
-                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
-            elif category in ['Audio']:
+                    indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
+            elif categoryAudio(category):
                 if self.process_param.indexer_audio.strip():
                     idlist = self.process_param.indexer_audio.split(',')
-                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
-            elif category in ['eBook']:
+                    indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
+            elif categoryEBook(category):
                 if self.process_param.indexer_ebook.strip():
                     idlist = self.process_param.indexer_ebook.split(',')
-                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
-            elif category in ['Other']:
+                    indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
+            elif categoryOther(category):
                 if self.process_param.indexer_other.strip():
                     idlist = self.process_param.indexer_other.split(',')
-                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+                    indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
             if indexerUrl:
-                return base_url + urlencode(main_params)+ '&'+indexerUrl
+                return base_url + urlencode(main_params) + '&'+indexerUrl
             else:
                 return None
         else:
             if self.process_param.trackers.strip():
                 idlist = self.process_param.trackers.split(',')
-                indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
-                return base_url + urlencode(main_params)+ '&'+indexerUrl
+                indexerUrl = urlencode({'indexerIds': idlist}, doseq=True)
+                return base_url + urlencode(main_params) + '&'+indexerUrl
             else:
                 return base_url + urlencode(main_params)
 
-
     # construct final search url
+
     def _get_jackett_search_url(self, search_query, local_release_data, category=''):
         base_url = self.process_param.jackett_url.strip(
             '/') + '/api/v2.0/indexers/all/results?'
@@ -184,30 +182,32 @@ class Searcher:
             'Query': search_query
         }
 
-        optional_params = {
-            'Category[]':
-            Searcher.category_types[local_release_data['guessed_data']
-                                    ['type']],
-            'season':
-            local_release_data['guessed_data'].get('season'),
-            'episode':
-            local_release_data['guessed_data'].get('episode')
-        }
+        optional_params = {}
+        if categoryMovieTV(category):
+            optional_params = {
+                'Category[]':
+                Searcher.category_types[local_release_data['guessed_data']
+                                        ['type']],
+                'season':
+                local_release_data['guessed_data'].get('season'),
+                'episode':
+                local_release_data['guessed_data'].get('episode')
+            }
         indexerUrl = None
         if self.process_param.category_indexers and category:
-            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K','MovieDVD', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4K', 'MV']:
+            if categoryMovieTV(category):
                 if self.process_param.indexer_movietv.strip():
                     indexerUrl = self.process_param.indexer_movietv
-            elif category in ['Music']:
+            elif categoryMusic(category):
                 if self.process_param.indexer_music.strip():
                     indexerUrl = self.process_param.indexer_music
-            elif category in ['Audio']:
+            elif categoryAudio(category):
                 if self.process_param.indexer_audio.strip():
                     indexerUrl = self.process_param.indexer_audio
-            elif category in ['eBook']:
+            elif categoryEBook(category):
                 if self.process_param.indexer_ebook.strip():
                     indexerUrl = self.process_param.indexer_ebook
-            elif category in ['Other']:
+            elif categoryOther(category):
                 if self.process_param.indexer_other.strip():
                     indexerUrl = self.process_param.indexer_other
 
@@ -310,6 +310,26 @@ class IndexResult():
         self.TrackerType = TrackerType
 
 
+def categoryMovieTV(category):
+    return category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K', 'MovieDVD', 'MovieWeb4K', 'MovieRemux', 'HDTV', 'Movie4K', 'MV']
+
+
+def categoryMusic(category):
+    return category in ['Music']
+
+
+def categoryEBook(category):
+    return category in ['eBook']
+
+
+def categoryAudio(category):
+    return category in ['Audio']
+
+
+def categoryOther(category):
+    return category in ['Other']
+
+
 def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle=''):
     local_release_data = {
         'basename': basename,
@@ -321,7 +341,6 @@ def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle='')
     # # TODO: use parseTitle
     # if parseTitle:
     #     local_release_data['guessed_data']['title'] = parseTitle
-    # log.message('Query title: ' + local_release_data['guessed_data']['title'])
 
     if local_release_data['guessed_data'].get('title') is None:
         s = 'Skipped: Could not get title from filename: {}'.format(
@@ -334,7 +353,7 @@ def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle='')
 
     if skip_CJK:
         if re.search(r'[\u4e00-\u9fa5\u3041-\u30fc]',
-                    local_release_data['guessed_data']['title']):
+                     local_release_data['guessed_data']['title']):
             s = 'Skipped: contains CJK characters in title: {}'.format(
                 local_release_data['basename'])
             logger.info(s)
@@ -342,6 +361,7 @@ def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle='')
 
             return []
 
+    # log.message('Query title: ' + local_release_data['guessed_data']['title'])
     return local_release_data
 
 
@@ -377,7 +397,7 @@ def saveCrossedTorrent(st, searchTor):
 
 def downloadResult(dlclient, result, localTor, log):
 
-    #Jackett if result['Link'] is None:
+    # Jackett if result['Link'] is None:
     if result.downloadUrl is None:
         s = 'Skipped: - Skipping release (no download link): ' + localTor.name
         logger.info(s)
@@ -424,25 +444,20 @@ def iterTorrents(dlclient, process_param, log):
         dbSearchTor = saveSearchedTorrent(localTor)
         catutil = GuessCategoryUtils()
         cat, group = catutil.guessByName(localTor.name)
-        parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
-        log.message('Searching: [ {} ] {}'.format(cat, localTor.name))
+
         # # TODO: use parseTitle
+        # parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
         # log.message('Parse: {}, {} {} {}'.format(parseTitle, parseYear, parseSeason, parseEpisode))
-
+        log.message('Searching: [ {} ] {}'.format(cat, localTor.name))
         searchData = genSearchKeyword(localTor.name, localTor.size,
-                                      localTor.tracker, log, process_param.skip_CJK, parseTitle)
+                                      localTor.tracker, log, process_param.skip_CJK)
 
-        # # TODO: debug the query param
-        # guessYear = ''
-        # if searchData['guessed_data'].get('year'):
-        #     guessYear = searchData['guessed_data']['year']
-        # log.message('GuessIt: {}, {}'.format(searchData['guessed_data']['title'], guessYear))
         if not searchData:
             continue
 
         query_count += 1
         log.status(progress=for_count, query_count=query_count)
-            
+
         searcher = Searcher(process_param)
         matchingResults = searcher.search(searchData, log, guess_cat=cat)
         log.inc(match_count=len(matchingResults))
@@ -458,6 +473,5 @@ def iterTorrents(dlclient, process_param, log):
                 saveCrossedTorrent(st, dbSearchTor)
             # else:
             #     log.message('Maybe existed: ' + localTor.name)
-
 
         time.sleep(FlowControlInterval)

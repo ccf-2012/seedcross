@@ -96,7 +96,7 @@ class GuessCategoryUtils:
             self.setCategory('Music')
         elif re.search(r'(\b\d+ ?CD|24-96|24\-192|24\-44\.1|FLAC.*24bit|FLAC.*44|FLAC.*48|WAV.*CUE|FLAC.*CUE|\[FLAC\]|FLAC.+WEB\b|FLAC.*Album|CD[\s-]+FLAC|FLAC[\s-]+CD)', torName, re.A | re.I):
             self.setCategory('Music')
-        elif re.search(r'(乐团|交响曲|协奏曲|二重奏|专辑\b)', torName):
+        elif re.search(r'(乐团|交响曲|协奏曲|奏鸣曲|[二三四]重奏|专辑\b)', torName):
             self.setCategory('Music')
         elif re.search(r'(\bThe.Movie.\d{4}|电影版)\b', torName, flags=re.A | re.I):
             if self.quality == 'WEBDL':
