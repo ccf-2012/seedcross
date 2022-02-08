@@ -71,12 +71,15 @@ class ParamSettingForm(forms.Form):
             <p><strong>Search options</strong></p>
             """),
             Field('include_cjk'),
-            Field('category_indexers'),
-            Field('indexer_movietv'),
-            Field('indexer_music'),
-            Field('indexer_ebook'),
-            Field('indexer_audio'),
-            Field('indexer_other'),
+            Field('category_indexers', id='check_id'),
+            Div(
+                Field('indexer_movietv'),
+                Field('indexer_music'),
+                Field('indexer_ebook'),
+                Field('indexer_audio'),
+                Field('indexer_other'),
+                css_id='CategoryIndexers', 
+            ), 
             HTML("""
             <p><strong>Flow Control Setting</strong></p>
             """),

@@ -209,7 +209,6 @@ def parseMovieName2(torName):
     sstr = cutExt(torName)
 
     sstr = re.sub(
-        # r'\b((UHD)?\s+BluRay|Blu-?ray|720p|1080[pi]|2160p|576i|WEB-DL|\.DVD\.|WEBRip|HDTV|Director(\'s)?[ .]Cut|REMASTERED|LIMITED|(The\s+)?Complete|SUBBED|TV Series).*$',
         r'\b((UHD)?\s+BluRay|Blu-?ray|720p|1080[pi]|2160p|576i|WEB-DL|\.DVD\.|WEBRip|HDTV|Director(\'s)?[ .]Cut|REMASTERED|LIMITED|Complete(?=[. -]\d+)|SUBBED|TV Series).*$',
         '',
         sstr,
@@ -218,7 +217,10 @@ def parseMovieName2(torName):
 
     sstr = re.sub(r'\W?(IMAX|Extended Cut)\s*$', '', sstr, flags=re.I)
 
-    dilimers = ['[', ']', '.', '{', '}', '_']
+    if sstr[-1] in ['(', '[', '{']:
+        sstr = sstr[:-1]
+
+    dilimers = ['[', ']', '.', '{', '}', '_', ',']
     for dchar in dilimers:
         sstr = sstr.replace(dchar, ' ')
 
@@ -241,10 +243,11 @@ def parseMovieName2(torName):
     sstr = re.sub(r'\b(剧集|全\d集|\d集全)\b', '', sstr, flags=re.I)
 
     titlestr = re.sub(r' +', ' ', sstr).strip()
-    titlestr = titlestr.replace('(', ' ').strip()
+
+    if titlestr[-1] == ')':
+        titlestr = re.sub(r'\(.*$', '', sstr).strip()
 
     cntitle = titlestr
-
     m = re.search(
         r'^.*[^a-zA-Z_\- &0-9](S\d+|\s|\.|\d|-)*\b(?=[A-Z])',
         # m = re.search(r'^.*[^\x00-\x7F](S\d+|\s|\.|\d|-)*\b(?=[A-Z])',
