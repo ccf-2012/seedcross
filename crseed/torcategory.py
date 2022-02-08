@@ -5,7 +5,7 @@ import os
 def cutExt(torName):
     tortup = os.path.splitext(torName)
     torext = tortup[1].lower()
-    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp']
+    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf']
     if torext in mvext:
         return tortup[0].strip()
     else:
@@ -45,9 +45,10 @@ class GuessCategoryUtils:
         'Movie4K': ['Movie4K', '36', 0, 'Movie4K'],  # 压制和Remux 4K，适合emby
         'MovieWebdl': ['MovieWebdl', '36', 0, 'MovieWebdl'],  # Web DL，适合emby
         'MovieWeb4K': ['MovieWeb4K', '36', 0, 'MovieWeb4K'],  # Web DL，适合emby
+        # 原盘, 适合播放机 & kodi
         'MovieBDMV': ['MovieBDMV', '35', 0, 'MovieBDMV'],  # 原盘, 适合播放机 & kodi
-        # 原盘 4K, 适合播放机 & kodi
         'MovieBDMV4K': ['MovieBDMV4K', '35', 0, 'MovieBDMV4K'],
+        'MovieDVD': ['MovieDVD', '35', 0, 'MovieDVD'],
         'HDTV': ['HDTV', '33', 0, 'HDTV'],
         'Other': ['Other', '33', 0, 'Others']
     }
@@ -69,8 +70,12 @@ class GuessCategoryUtils:
             self.setCategory('eBook')
         elif re.search(r'\.(mpg)\b', torName, re.I):
             self.setCategory('MV')
-        elif re.search(r'\b(FLAC.{0,3}|DSD(\d{1,3})?)$', torName, re.I):
+        elif re.search(r'(\b|_)(FLAC.{0,3}|DSF.{0,3}|DSD(\d{1,3})?)$', torName, re.I):
             self.setCategory('Music')
+        elif re.search(r'(\b|_)(BD25\b|BD50\b|BD66\b|BD$)', torName, re.I):
+            self.setCategory('MovieBDMV')
+        elif re.search(r'(\b|_)(DVD(\d+)?)\b', torName, re.I):
+            self.setCategory('MovieDVD')
         else:
             return False
         return True

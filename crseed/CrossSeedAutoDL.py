@@ -58,6 +58,14 @@ class Searcher:
         elif self.process_param.jackett_prowlarr == 1:
             search_url = self._get_prowlarr_search_url(search_query,
                                                        local_release_data, guess_cat)
+        else:
+            log.message('This is impossible.')
+            return []
+
+        if not search_url:
+            log.message('Skip, No indexer configured for [ {} ] category'.format(guess_cat))
+            return []
+
         logger.info(search_url)
 
         resp = None
@@ -133,7 +141,7 @@ class Searcher:
 
         indexerUrl = None
         if self.process_param.category_indexers and category:
-            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4k', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4k', 'MV']:
+            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K', 'MovieDVD', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4K', 'MV']:
                 if self.process_param.indexer_movietv.strip():
                     idlist = self.process_param.indexer_movietv.split(',')
                     indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
@@ -153,15 +161,18 @@ class Searcher:
                 if self.process_param.indexer_other.strip():
                     idlist = self.process_param.indexer_other.split(',')
                     indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+            if indexerUrl:
+                return base_url + urlencode(main_params)+ '&'+indexerUrl
+            else:
+                return None
         else:
             if self.process_param.trackers.strip():
                 idlist = self.process_param.trackers.split(',')
                 indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+                return base_url + urlencode(main_params)+ '&'+indexerUrl
+            else:
+                return base_url + urlencode(main_params)
 
-        if indexerUrl:
-            return base_url + urlencode(main_params)+ '&'+indexerUrl
-        else:
-            return base_url + urlencode(main_params)
 
     # construct final search url
     def _get_jackett_search_url(self, search_query, local_release_data, category=''):
@@ -182,26 +193,31 @@ class Searcher:
             'episode':
             local_release_data['guessed_data'].get('episode')
         }
-
+        indexerUrl = None
         if self.process_param.category_indexers and category:
-            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4k', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4k', 'MV']:
+            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K','MovieDVD', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4K', 'MV']:
                 if self.process_param.indexer_movietv.strip():
-                    optional_params['Tracker[]'] = self.process_param.indexer_movietv
+                    indexerUrl = self.process_param.indexer_movietv
             elif category in ['Music']:
                 if self.process_param.indexer_music.strip():
-                    optional_params['Tracker[]'] = self.process_param.indexer_music
+                    indexerUrl = self.process_param.indexer_music
             elif category in ['Audio']:
                 if self.process_param.indexer_audio.strip():
-                    optional_params['Tracker[]'] = self.process_param.indexer_audio
+                    indexerUrl = self.process_param.indexer_audio
             elif category in ['eBook']:
                 if self.process_param.indexer_ebook.strip():
-                    optional_params['Tracker[]'] = self.process_param.indexer_ebook
+                    indexerUrl = self.process_param.indexer_ebook
             elif category in ['Other']:
                 if self.process_param.indexer_other.strip():
-                    optional_params['Tracker[]'] = self.process_param.indexer_other
+                    indexerUrl = self.process_param.indexer_other
+
+            if indexerUrl:
+                optional_params['Tracker[]'] = indexerUrl
+            else:
+                return None
         else:
             if self.process_param.trackers.strip():
-                optional_params['Tracker[]'] = self.process_param.trackers
+                indexerUrl = self.process_param.trackers
 
         for param, arg in optional_params.items():
             if arg is not None:
@@ -275,14 +291,6 @@ class Searcher:
 
         return matching_results
 
-    ###
-    # def _save_results(self, local_release_data):
-    #     search_results_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), 'search_results.json' )
-    #     target_dict = {'local_release_data': local_release_data, 'results': self.search_results}
-    #
-    #     with open(search_results_path, 'w', encoding='utf8') as f:
-    #         json.dump([target_dict], f, indent=4)
-
 
 class IndexResult():
     def __init__(self, indexer, categories, title, downloadUrl, infoUrl, size,
@@ -296,13 +304,18 @@ class IndexResult():
         self.imdbId = imdbId
 
 
-def genSearchKeyword(basename, size, tracker, log, skip_CJK=True):
+def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle=''):
     local_release_data = {
         'basename': basename,
         'size': size,
         'guessed_data': guessit(basename),
         'tracker': tracker
     }
+
+    # # TODO: use parseTitle
+    # if parseTitle:
+    #     local_release_data['guessed_data']['title'] = parseTitle
+    # log.message('Query title: ' + local_release_data['guessed_data']['title'])
 
     if local_release_data['guessed_data'].get('title') is None:
         s = 'Skipped: Could not get title from filename: {}'.format(
@@ -391,6 +404,8 @@ def iterTorrents(dlclient, process_param, log):
     for_count = 0
     query_count = 0
     for localTor in torList:
+        if query_count >= FlowControlLimitCount:
+            return
 
         for_count += 1
         log.status(progress=for_count)
@@ -404,22 +419,27 @@ def iterTorrents(dlclient, process_param, log):
         catutil = GuessCategoryUtils()
         cat, group = catutil.guessByName(localTor.name)
         parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
+        log.message('Searching: [ {} ] {}'.format(cat, localTor.name))
+        # # TODO: use parseTitle
+        # log.message('Parse: {}, {} {} {}'.format(parseTitle, parseYear, parseSeason, parseEpisode))
 
         searchData = genSearchKeyword(localTor.name, localTor.size,
-                                      localTor.tracker, log, process_param.skip_CJK)
+                                      localTor.tracker, log, process_param.skip_CJK, parseTitle)
+
+        # # TODO: debug the query param
+        # guessYear = ''
+        # if searchData['guessed_data'].get('year'):
+        #     guessYear = searchData['guessed_data']['year']
+        # log.message('GuessIt: {}, {}'.format(searchData['guessed_data']['title'], guessYear))
         if not searchData:
             continue
 
         query_count += 1
-        if query_count >= FlowControlLimitCount:
-            return
         log.status(progress=for_count, query_count=query_count)
-        log.message('Searching: ' +  '[ ' + cat + ' ] ' + searchData['guessed_data']['title'])
-        # log.message('tortile.parseTitle = ' + parseTitle)
+            
         searcher = Searcher(process_param)
-        matchingResults = searcher.search(searchData, log, cat)
+        matchingResults = searcher.search(searchData, log, guess_cat=cat)
         log.inc(match_count=len(matchingResults))
-        # log.message('Found: %d Results' % (len(matchingResults)))
         for result in matchingResults:
             if checkTaskCanclled() or log.abort():
                 return
@@ -430,7 +450,8 @@ def iterTorrents(dlclient, process_param, log):
                 log.inc(download_count=1)
                 log.message('Added: ' + localTor.name)
                 saveCrossedTorrent(st, dbSearchTor)
-            else:
-                log.message('Maybe existed: ' + localTor.name)
+            # else:
+            #     log.message('Maybe existed: ' + localTor.name)
+
 
         time.sleep(FlowControlInterval)

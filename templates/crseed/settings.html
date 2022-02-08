@@ -16,3 +16,20 @@
 </div>
 
 {% endblock %}
+
+{% block script%}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#check_id').on('change',function(){
+            // console.log($(this).is(":checked") );
+            if( $(this).is(":checked")){
+                $("#CategoryIndexers").show()
+             }
+             else{
+                $("#CategoryIndexers").hide()
+             }
+        });
+        $("#check_id").trigger("change")         
+    });
+</script>
+{% endblock %}

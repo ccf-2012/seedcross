@@ -23,12 +23,18 @@ def getDownloadClient(scsetting, log=None):
 
 
 class DownloadClientBase(metaclass=ABCMeta):
-    def __init__(self, scsetting):
+    def __init__(self, scsetting, log=None):
         self.scsetting = scsetting
+        self.logger = log
 
     @abstractmethod
     def connect(self):
         pass
+
+    def log(self, msg):
+        if self.logger:
+            self.logger.message(msg)
+        logger.debug(msg)
 
 
 class TrDownloadClient(DownloadClientBase):
@@ -36,11 +42,6 @@ class TrDownloadClient(DownloadClientBase):
         self.scsetting = scsetting
         self.trClient = None
         self.logger = log
-
-    def log(self, msg):
-        if self.logger:
-            self.logger.message(msg)
-        logger.debug(msg)
 
     def connect(self):
         self.trClient = None
@@ -104,7 +105,7 @@ class TrDownloadClient(DownloadClientBase):
                 newtor = self.trClient.add_torrent(
                     tor_url, paused=True, download_dir=download_location)
             except Exception as e:
-                self.log('Torrent not added' + str(e))
+                self.log('Torrent not added. Torrent already in session..')
                 return None
 
         return self.getTorrent(newtor.hashString)
@@ -121,7 +122,7 @@ class TrDownloadClient(DownloadClientBase):
                                               ])
 
         except Exception as e:
-            self.log('Torrent was not added! maybe exists.' + str(e))
+            self.log('Torrent was not added! maybe exists.')
             return None
         else:
             if trTor:
@@ -150,7 +151,7 @@ class QbDownloadClient(DownloadClientBase):
         try:
             self.qbClient.auth_log_in()
         except Exception as ex:
-            self.log('There was an error during auth_log_in: ' + str(ex))
+            self.log('There was an error during auth_log_in: ' + repr(ex))
             return None
 
         return self.qbClient
@@ -217,7 +218,7 @@ class QbDownloadClient(DownloadClientBase):
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
             except Exception as e:
-                self.log('Torrent not added' + str(e))
+                self.log('Torrent not added! Torrent already in session.')
                 return None
 
         return st
@@ -227,7 +228,7 @@ class QbDownloadClient(DownloadClientBase):
             logger.info('Double checking that the torrent was added.')
             qbTor = self.qbClient.torrents_info(torrent_hashes=tor_hash)
         except Exception as e:
-            logger.warn('Torrent was not added! maybe exists.')
+            logger.warn('Torrent was not added! ')
             return None
         else:
             if qbTor:
@@ -255,7 +256,7 @@ class DeDownloadClient(DownloadClientBase):
                 self.scsetting.host, int(self.scsetting.port),
                 self.scsetting.username, self.scsetting.password)
         except Exception as e:
-            self.log('Could not create DelugeRPCClient Object' + str(e))
+            self.log('Could not create DelugeRPCClient Object...')
             return None
         else:
             try:
@@ -289,7 +290,7 @@ class DeDownloadClient(DownloadClientBase):
             ])
 
         except Exception as e:
-            self.log('Torrent was not added: ' + str(e))
+            self.log('Torrent was not added, Torrent already in session')
             return None
         else:
             if deTor:
@@ -314,7 +315,7 @@ class DeDownloadClient(DownloadClientBase):
                 torhash = torid.decode("utf-8")
 
             except Exception as e:
-                self.log('Torrent not added ' + str(e))
+                self.log('Torrent not added, Torrent already in session.')
                 return None
 
         return self.getTorrent(torhash)
@@ -343,7 +344,7 @@ class DeDownloadClient(DownloadClientBase):
                     'core.add_torrent_file', str(os.path.basename(filepath)),
                     base64.encodestring(torrentcontent), t_options)
             except Exception as e:
-                self.log('Torrent not added' + str(e))
+                self.log('Torrent not added, Torrent already in session.')
                 return None
 
         return self.getTorrent(torrent_id)

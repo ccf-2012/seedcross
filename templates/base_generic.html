@@ -37,15 +37,8 @@
           </li>
         </ul>
         <ul class="navbar-nav mr-sm-2">
-          <li class="nav-item dropdown ">
-            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" >
-              History
-            </a>
-            <ul class="dropdown-menu " aria-labelledby="userMenu">
-              <li> <a class="dropdown-item" href="{% url 'cs_history' %}">Search History</a> </li>
-                <li class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'cs_clear_history' %}">Clear Search History</a></li>
-          </ul>
+          <li class="nav-item ">
+            <a class="nav-link " href="{% url 'cs_history' %}">Search History</a> 
           </li>
           <li class="nav-item dropdown ">
             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" >
