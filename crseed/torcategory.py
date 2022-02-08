@@ -2,6 +2,15 @@ import re
 import os
 
 
+def cutExt(torName):
+    tortup = os.path.splitext(torName)
+    torext = tortup[1].lower()
+    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp']
+    if torext in mvext:
+        return tortup[0].strip()
+    else:
+        return torName
+
 class CategoryItem:
     def __init__(label, number):
         label = label
@@ -10,6 +19,7 @@ class CategoryItem:
 
 
 class GuessCategoryUtils:
+    # def __init__(self):
     # 有些组生产 TV Series，但是在种子名上不显示 S01 这些
     TV_GROUPS = ['CMCTV', 'FLTTH']
     WEB_GROUPS = ['CHDWEB', 'PTERWEB', 'HARESWEB', 'DBTV', 'QHSTUDIO', 
@@ -44,88 +54,93 @@ class GuessCategoryUtils:
 
     category = ''
     group = ''
+    resolution = ''
+    quality = ''
     CategorySummary = []
 
-    def setCategory(category):
-        GuessCategoryUtils.category = category
-        GuessCategoryUtils.CATEGORIES[category][2] += 1
+    def setCategory(self, category):
+        self.category = category
+        self.CATEGORIES[category][2] += 1
 
-    def categoryByExt(torName):
+    def categoryByExt(self, torName):
         if re.search(
                 r'(pdf|epub|mobi|txt|chm|azw3|CatEDU|eBook-\w{4,8}|mobi|doc|docx).?$',
                 torName, re.I):
-            GuessCategoryUtils.setCategory('eBook')
+            self.setCategory('eBook')
         elif re.search(r'\.(mpg)\b', torName, re.I):
-            GuessCategoryUtils.setCategory('MV')
+            self.setCategory('MV')
         elif re.search(r'\b(FLAC.{0,3}|DSD(\d{1,3})?)$', torName, re.I):
-            GuessCategoryUtils.setCategory('Music')
+            self.setCategory('Music')
         else:
             return False
         return True
 
-    def categoryByKeyword(torName):
+    def categoryByKeyword(self, torName):
         if re.search(r'(上下册|全.{1,4}册|精装版|修订版|第\d版|共\d本|文集|新修版|PDF版|课本|课件|出版社)',
                      torName):
-            GuessCategoryUtils.setCategory('eBook')
+            self.setCategory('eBook')
         elif re.search(r'(\d+册|\d+期|\d+版|\d+本|\d+年|\d+月|系列|全集|作品集).?$',
                        torName):
-            GuessCategoryUtils.setCategory('eBook')
+            self.setCategory('eBook')
         elif re.search(r'(\bConcert|演唱会|音乐会|\bLive[. ]At)\b', torName, re.A | re.I):
-            GuessCategoryUtils.setCategory('MV')
+            self.setCategory('MV')
         elif re.search(r'\bBugs!.?\.mp4', torName, re.I):
-            GuessCategoryUtils.setCategory('MV')
+            self.setCategory('MV')
         elif re.search(r'(\bVarious Artists|\bMQA\b|整轨|\b分轨|\b无损|\bLPCD|\bSACD|XRCD\d{1,3})',
                        torName, re.A | re.I):
-            GuessCategoryUtils.setCategory('Music')
+            self.setCategory('Music')
         elif re.search(r'(\b\d+ ?CD|24-96|24\-192|24\-44\.1|FLAC.*24bit|FLAC.*44|FLAC.*48|WAV.*CUE|FLAC.*CUE|\[FLAC\]|FLAC.+WEB\b|FLAC.*Album|CD[\s-]+FLAC|FLAC[\s-]+CD)', torName, re.A | re.I):
-            GuessCategoryUtils.setCategory('Music')
+            self.setCategory('Music')
         elif re.search(r'(乐团|交响曲|协奏曲|二重奏|专辑\b)', torName):
-            GuessCategoryUtils.setCategory('Music')
+            self.setCategory('Music')
+        elif re.search(r'(\bThe.Movie.\d{4}|电影版)\b', torName, flags=re.A | re.I):
+            if self.quality == 'WEBDL':
+                self.setCategory('MovieWebdl')
+            else:
+                self.setCategory('MovieEncode')
         else:
             return False
         return True
 
-    def categoryTvByName(torName):
+    def categoryTvByName(self, torName):
         if re.search(r'\bHDTV\b', torName):
-            GuessCategoryUtils.setCategory('HDTV')
+            self.setCategory('HDTV')
+        elif re.search(r'(\b(S\d+)(E\d+)?|(Ep?\d+-Ep?\d+))\b', torName, flags=re.A | re.I):
+            self.setCategory('TV')
+        elif re.search(r'(第\s*(\d+)(-\d+)?季)\b', torName, flags=re.I):
+            self.setCategory('TV')
+        elif re.search(r'(\bS\d+(-S\d+))\b', torName, flags=re.A | re.I):
+            self.setCategory('TV')
         elif re.search(r'\W[ES]\d+\W|EP\d+\W|\d+季|第\w{1,3}季\W', torName, re.A | re.I):
-            GuessCategoryUtils.setCategory('TV')
-        elif re.search(r'Full.Season|全\d+集|\d+集全', torName, re.A | re.I):
-            GuessCategoryUtils.setCategory('TV')
+            self.setCategory('TV')
+        elif re.search(r'Complete.+Web-?dl|Full.Season|全\d+集|\d+集全', torName, re.A | re.I):
+            self.setCategory('TV')
         else:
             return False
         return True
 
-    def categoryByGroup(group):
-        if group in GuessCategoryUtils.MV_GROUPS:
-            GuessCategoryUtils.setCategory('MV')
-        elif group in GuessCategoryUtils.AUDIO_GROUPS:
-            GuessCategoryUtils.setCategory('Audio')
-        elif group in GuessCategoryUtils.TV_GROUPS:
-            GuessCategoryUtils.setCategory('TV')
-        elif group in GuessCategoryUtils.WEB_GROUPS:
-            GuessCategoryUtils.setCategory('TV')
-        elif group in GuessCategoryUtils.MOVIE_ENCODE_GROUPS:
-            GuessCategoryUtils.setCategory('MovieEncode')
+    def categoryByGroup(self, group):
+        if group in self.MV_GROUPS:
+            self.setCategory('MV')
+        elif group in self.AUDIO_GROUPS:
+            self.setCategory('Audio')
+        elif group in self.TV_GROUPS:
+            self.setCategory('TV')
+        elif group in self.WEB_GROUPS:
+            self.setCategory('TV')
+        elif group in self.MOVIE_ENCODE_GROUPS:
+            self.setCategory('MovieEncode')
         else:
             return False
         return True
 
 
-    def cutExt(torName):
-        tortup = os.path.splitext(torName)
-        torext = tortup[1].lower()
-        mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp']
-        if torext in mvext:
-            return tortup[0].strip()
-        else:
-            return torName
 
-    def parseGroup(torName):
-        sstr = GuessCategoryUtils.cutExt(torName)
+    def parseGroup(self, torName):
+        sstr = cutExt(torName)
         match = re.search(r'[@\-￡]\s?(\w{3,12})\b(?!.*[@\-￡].*)$', sstr, re.I)
         if match:
-            groupName = match.group(1).strip().upper()
+            groupName = match.group(1).strip()
             if groupName.startswith('CMCT'):
                 if not groupName.startswith('CMCTV'):
                     groupName = 'CMCT'
@@ -133,15 +148,15 @@ class GuessCategoryUtils:
 
         return None
 
-    def getResolution(torName):
+    def getResolution(self, torName):
         match = re.search(r'\b(2160p|1080[pi]|720p|576p|480p)\b', torName, re.A | re.I)
         if match:
             return match.group(0).strip().lower()
         else:
             return ''
 
-    def getQuality(torName):
-        match = re.search(r'\b(Blu[\-\. ]?Ray|WEB[\-\. ]?DL)\b', torName, re.A | re.I)
+    def getSource(self, torName):
+        match = re.search(r'\b(Blu[\-\. ]?Ray|WEB[\-\. ]?DL|WEBRip)\b', torName, re.A | re.I)
         if match:
             groupstr = match.group(0).strip().lower()
             if 'blu' in groupstr:
@@ -151,65 +166,67 @@ class GuessCategoryUtils:
         else:
             return ''
 
-    def categoryByQuality(torName):
-        quality = GuessCategoryUtils.getQuality(torName)
-        resolution = GuessCategoryUtils.getResolution(torName)
-        if quality:
-            # 来源为原盘的
-            if quality == 'BLURAY':
-                # Remux, 压制 还是 原盘
-                if re.search(r'\WREMUX\W', torName, re.I):
-                    if resolution == '2160p':
-                        GuessCategoryUtils.setCategory('Movie4K')
-                    else:
-                        GuessCategoryUtils.setCategory('MovieRemux')
-                elif re.search(r'\b(x265|x264)\b', torName, re.I):
-                    if resolution == '2160p':
-                        GuessCategoryUtils.setCategory('Movie4K')
-                    else:
-                        GuessCategoryUtils.setCategory('MovieEncode')
+    def categoryByQuality(self, torName):
+        # 来源为原盘的
+        if self.quality == 'BLURAY':
+            # Remux, 压制 还是 原盘
+            if re.search(r'\WREMUX\W', torName, re.I):
+                if self.resolution == '2160p':
+                    self.setCategory('Movie4K')
                 else:
-                    if resolution == '2160p':
-                        GuessCategoryUtils.setCategory('MovieBDMV4K')
-                    else:
-                        GuessCategoryUtils.setCategory('MovieBDMV')
-            # 来源是 WEB-DL
-            elif quality == 'WEBDL': 
-                if resolution == '2160p':
-                    GuessCategoryUtils.setCategory('MovieWeb4K')
+                    self.setCategory('MovieRemux')
+            elif re.search(r'\b(x265|x264)\b', torName, re.I):
+                if self.resolution == '2160p':
+                    self.setCategory('Movie4K')
                 else:
-                    GuessCategoryUtils.setCategory('MovieWebdl')
+                    self.setCategory('MovieEncode')
+            else:
+                if self.resolution == '2160p':
+                    self.setCategory('MovieBDMV4K')
+                else:
+                    self.setCategory('MovieBDMV')
+        # 来源是 WEB-DL
+        elif self.quality == 'WEBDL': 
+            if self.resolution == '2160p':
+                self.setCategory('MovieWeb4K')
+            else:
+                self.setCategory('MovieWebdl')
+        else:
+            if re.search(r'\WREMUX\W', torName, re.I):
+                self.setCategory('MovieRemux')
+            elif re.search(r'\b(x265|x264)\b', torName, re.I):
+                self.setCategory('MovieEncode')
             else:
                 return False
-            return True
-        return False
+        return True
 
-    @staticmethod
-    def guessByName(torName):
-        GuessCategoryUtils.group = GuessCategoryUtils.parseGroup(torName)
-        if GuessCategoryUtils.categoryByExt(torName):
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+    def guessByName(self, torName):
+        self.group = self.parseGroup(torName)
+        self.quality = self.getSource(torName)
+        self.resolution = self.getResolution(torName)
+        if self.categoryByExt(torName):
+            return self.category, self.group
 
-        if GuessCategoryUtils.categoryTvByName(torName):
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+        if self.categoryTvByName(torName):
+            return self.category, self.group
 
-        if GuessCategoryUtils.categoryByKeyword(torName):
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+        if self.categoryByKeyword(torName):
+            return self.category, self.group
 
-        if GuessCategoryUtils.categoryByGroup(GuessCategoryUtils.group):
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+        if self.categoryByGroup(self.group):
+            return self.category, self.group
 
         # 非web组出的
-        if GuessCategoryUtils.categoryByQuality(torName):
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+        if self.categoryByQuality(torName):
+            return self.category, self.group
         else:
             # Other的条件： TV/MV/Audio都匹配不上，quality没标记，各种压制组也对不上
-            GuessCategoryUtils.setCategory('Other')
-            return GuessCategoryUtils.category, GuessCategoryUtils.group
+            self.setCategory('Other')
+            return self.category, self.group
 
-    def getSummary():
-        for cat in GuessCategoryUtils.CATEGORIES.keys():
-            ic = CategoryItem(GuessCategoryUtils.CATEGORIES[cat][0],
-                              GuessCategoryUtils.CATEGORIES[cat][2])
-            GuessCategoryUtils.CategorySummary.append(ic)
-        return GuessCategoryUtils.CategorySummary
+    def getSummary(self):
+        for cat in self.CATEGORIES.keys():
+            ic = CategoryItem(self.CATEGORIES[cat][0],
+                              self.CATEGORIES[cat][2])
+            self.CategorySummary.append(ic)
+        return self.CategorySummary

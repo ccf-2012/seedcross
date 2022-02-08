@@ -1,6 +1,7 @@
 from asyncio.streams import FlowControlMixin
 import json
 import logging
+from operator import index
 import os
 import re
 from django.utils import timezone
@@ -9,6 +10,9 @@ import shutil
 import time
 from guessit import guessit
 from urllib.parse import urlencode
+
+from .torcategory import GuessCategoryUtils
+from .tortitle import parseMovieName
 from .models import CrossTorrent, TaskControl, SearchedHistory
 
 logger = logging.getLogger(__name__)
@@ -36,7 +40,7 @@ class Searcher:
         self.search_results = []
         self.process_param = process_param
 
-    def search(self, local_release_data, log):
+    def search(self, local_release_data, log, guess_cat=''):
         if local_release_data['size'] is None:
             s = 'Skipped: Could not get proper filesize data'
             logger.info(s)
@@ -50,10 +54,10 @@ class Searcher:
 
         if self.process_param.jackett_prowlarr == 0:
             search_url = self._get_jackett_search_url(search_query,
-                                                      local_release_data)
+                                                      local_release_data, guess_cat)
         elif self.process_param.jackett_prowlarr == 1:
             search_url = self._get_prowlarr_search_url(search_query,
-                                                       local_release_data)
+                                                       local_release_data, guess_cat)
         logger.info(search_url)
 
         resp = None
@@ -100,11 +104,10 @@ class Searcher:
         elif self.process_param.jackett_prowlarr == 1:
             result_json = resp_json
 
-        # Jackett self.search_results = self._trim_results(resp_json['Results'])
         trim_result = self.loadToIndexResult(result_json)
         return self._get_matching_results(local_release_data, trim_result, log)
 
-    def _get_prowlarr_search_url(self, search_query, local_release_data):
+    def _get_prowlarr_search_url(self, search_query, local_release_data, category=''):
         base_url = self.process_param.jackett_url.strip(
             '/') + '/api/v1/search?'
 
@@ -115,7 +118,6 @@ class Searcher:
         }
 
         optional_params = {
-            # Jackett 'Category[]':
             'category':
             Searcher.category_types[local_release_data['guessed_data']
                                     ['type']],
@@ -129,15 +131,40 @@ class Searcher:
             if arg is not None:
                 main_params[param] = arg
 
-        if self.process_param.trackers.strip():
-            idlist = self.process_param.trackers.split(',')
-            indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+        indexerUrl = None
+        if self.process_param.category_indexers and category:
+            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4k', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4k', 'MV']:
+                if self.process_param.indexer_movietv.strip():
+                    idlist = self.process_param.indexer_movietv.split(',')
+                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+            elif category in ['Music']:
+                if self.process_param.indexer_music.strip():
+                    idlist = self.process_param.indexer_music.split(',')
+                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+            elif category in ['Audio']:
+                if self.process_param.indexer_audio.strip():
+                    idlist = self.process_param.indexer_audio.split(',')
+                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+            elif category in ['eBook']:
+                if self.process_param.indexer_ebook.strip():
+                    idlist = self.process_param.indexer_ebook.split(',')
+                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+            elif category in ['Other']:
+                if self.process_param.indexer_other.strip():
+                    idlist = self.process_param.indexer_other.split(',')
+                    indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
+        else:
+            if self.process_param.trackers.strip():
+                idlist = self.process_param.trackers.split(',')
+                indexerUrl = urlencode({'indexerIds':idlist}, doseq=True)
 
-
-        return base_url + urlencode(main_params)+ '&'+indexerUrl
+        if indexerUrl:
+            return base_url + urlencode(main_params)+ '&'+indexerUrl
+        else:
+            return base_url + urlencode(main_params)
 
     # construct final search url
-    def _get_jackett_search_url(self, search_query, local_release_data):
+    def _get_jackett_search_url(self, search_query, local_release_data, category=''):
         base_url = self.process_param.jackett_url.strip(
             '/') + '/api/v2.0/indexers/all/results?'
 
@@ -155,8 +182,26 @@ class Searcher:
             'episode':
             local_release_data['guessed_data'].get('episode')
         }
-        if self.process_param.trackers.strip():
-            optional_params['Tracker[]'] = self.process_param.trackers
+
+        if self.process_param.category_indexers and category:
+            if category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4k', 'MovieWeb4K','MovieRemux', 'HDTV', 'Movie4k', 'MV']:
+                if self.process_param.indexer_movietv.strip():
+                    optional_params['Tracker[]'] = self.process_param.indexer_movietv
+            elif category in ['Music']:
+                if self.process_param.indexer_music.strip():
+                    optional_params['Tracker[]'] = self.process_param.indexer_music
+            elif category in ['Audio']:
+                if self.process_param.indexer_audio.strip():
+                    optional_params['Tracker[]'] = self.process_param.indexer_audio
+            elif category in ['eBook']:
+                if self.process_param.indexer_ebook.strip():
+                    optional_params['Tracker[]'] = self.process_param.indexer_ebook
+            elif category in ['Other']:
+                if self.process_param.indexer_other.strip():
+                    optional_params['Tracker[]'] = self.process_param.indexer_other
+        else:
+            if self.process_param.trackers.strip():
+                optional_params['Tracker[]'] = self.process_param.trackers
 
         for param, arg in optional_params.items():
             if arg is not None:
@@ -355,18 +400,23 @@ def iterTorrents(dlclient, process_param, log):
             continue
 
         dbSearchTor = saveSearchedTorrent(localTor)
+        catutil = GuessCategoryUtils()
+        cat, group = catutil.guessByName(localTor.name)
+        parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
+
         searchData = genSearchKeyword(localTor.name, localTor.size,
                                       localTor.tracker, log)
         if not searchData:
             continue
 
         query_count += 1
-        log.status(progress=for_count, query_count=query_count)
-        log.message('Searching: ' + searchData['guessed_data']['title'])
         if query_count >= FlowControlLimitCount:
             return
+        log.status(progress=for_count, query_count=query_count)
+        log.message('Searching: ' +  '[ ' + cat + ' ] ' + searchData['guessed_data']['title'])
+        log.message('tortile.parseTitle = ' + parseTitle)
         searcher = Searcher(process_param)
-        matchingResults = searcher.search(searchData, log)
+        matchingResults = searcher.search(searchData, log, cat)
         log.inc(match_count=len(matchingResults))
         # log.message('Found: %d Results' % (len(matchingResults)))
         for result in matchingResults:
@@ -380,6 +430,6 @@ def iterTorrents(dlclient, process_param, log):
                 log.message('Added: ' + localTor.name)
                 saveCrossedTorrent(st, dbSearchTor)
             else:
-                log.message('Skiped: ' + localTor.name)
+                log.message('Maybe existed: ' + localTor.name)
 
         time.sleep(FlowControlInterval)

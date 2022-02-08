@@ -35,7 +35,12 @@ class TrDownloadClient(DownloadClientBase):
     def __init__(self, scsetting, log=None):
         self.scsetting = scsetting
         self.trClient = None
-        self.log = log
+        self.logger = log
+
+    def log(self, msg):
+        if self.logger:
+            self.logger.message(msg)
+        logger.debug(msg)
 
     def connect(self):
         self.trClient = None
@@ -46,9 +51,7 @@ class TrDownloadClient(DownloadClientBase):
                 username=self.scsetting.username,
                 password=self.scsetting.password)
         except transmission_rpc.error.TransmissionError as e:
-            if self.log:
-                self.log.message("TransmissionError: check settings")
-            print(e)
+            self.log("TransmissionError: check settings")
             return None
 
         return self.trClient
@@ -101,9 +104,7 @@ class TrDownloadClient(DownloadClientBase):
                 newtor = self.trClient.add_torrent(
                     tor_url, paused=True, download_dir=download_location)
             except Exception as e:
-                if self.log:
-                    self.log.message('Torrent not added')
-                logger.debug('Torrent not added')
+                self.log('Torrent not added' + str(e))
                 return None
 
         return self.getTorrent(newtor.hashString)
@@ -120,20 +121,15 @@ class TrDownloadClient(DownloadClientBase):
                                               ])
 
         except Exception as e:
-            s = 'Torrent was not added! maybe exists.'
-            logger.warn(s)
-            if self.log:
-                self.log.message(s)
+            self.log('Torrent was not added! maybe exists.' + str(e))
             return None
         else:
             if trTor:
-                s = 'Torrent successfully added!'
-                logger.info(s)
-                if self.log:
-                    self.log.message(s)
+                self.log('Torrent successfully added!')
                 st = self.mkSeedTor(trTor)
                 return st
             else:
+                self.log('Torrent not added! Maybe exists.')
                 return None
 
 
@@ -141,7 +137,7 @@ class QbDownloadClient(DownloadClientBase):
     def __init__(self, scsetting, log=None):
         self.scsetting = scsetting
         self.qbClient = None
-        self.log = log
+        self.logger = log
 
     def connect(self):
         self.qbClient = qbittorrentapi.Client(
@@ -154,10 +150,7 @@ class QbDownloadClient(DownloadClientBase):
         try:
             self.qbClient.auth_log_in()
         except Exception as ex:
-            s = 'There was an error during auth_log_in: ' + str(ex)
-            if self.log:
-                self.log.message(s)
-            logger.error(s)
+            self.log('There was an error during auth_log_in: ' + str(ex))
             return None
 
         return self.qbClient
@@ -224,7 +217,7 @@ class QbDownloadClient(DownloadClientBase):
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
             except Exception as e:
-                logger.debug('Torrent not added')
+                self.log('Torrent not added' + str(e))
                 return None
 
         return st
@@ -238,10 +231,11 @@ class QbDownloadClient(DownloadClientBase):
             return None
         else:
             if qbTor:
-                logger.info('Torrent successfully added!')
+                self.log('Torrent successfully added!')
                 st = self.mkSeedTor(qbTor)
                 return st
             else:
+                self.log('Torrent not added! Maybe exists.')
                 return None
 
 
@@ -249,34 +243,25 @@ class DeDownloadClient(DownloadClientBase):
     def __init__(self, scsetting, log=None):
         self.scsetting = scsetting
         self.deClient = None
-        self.log = log
+        self.logger = log
 
     def connect(self):
         if self.scsetting is None:
             return None
 
-        s = 'Connecting to ' + self.scsetting.host + ':' + str(self.scsetting.port)
-        logger.info(s)
-        if self.log:
-            self.log.message(s)
+        self.log('Connecting to ' + self.scsetting.host + ':' + str(self.scsetting.port))
         try:
             self.deClient = deluge_client.DelugeRPCClient(
                 self.scsetting.host, int(self.scsetting.port),
                 self.scsetting.username, self.scsetting.password)
         except Exception as e:
-            s = 'Could not create DelugeRPCClient Object' + str(e)
-            logger.error(s)
-            if self.log:
-                self.log.message(s)
+            self.log('Could not create DelugeRPCClient Object' + str(e))
             return None
         else:
             try:
                 self.deClient.connect()
             except Exception as e:
-                s = 'Could not connect to Deluge ' + self.scsetting.host
-                logger.error(s)
-                if self.log:
-                    self.log.message(s)
+                self.log('Could not connect to Deluge ' + self.scsetting.host)
             else:
                 return self.deClient
 
@@ -295,10 +280,7 @@ class DeDownloadClient(DownloadClientBase):
 
     def getTorrent(self, tor_hash):
         try:
-            s = 'Double checking that the torrent was added.'
-            logger.info(s)
-            if self.log:
-                self.log.message(s)
+            self.log('Double checking that the torrent was added.')
 
             # deTor1 = self.get_torrent(tor_hash)
             deTor = self.deClient.call('core.get_torrent_status', tor_hash, [
@@ -307,21 +289,15 @@ class DeDownloadClient(DownloadClientBase):
             ])
 
         except Exception as e:
-            s = 'Torrent was not added! maybe exists.'
-            logger.warn(s)
-            if self.log:
-                self.log.message(s)
-
+            self.log('Torrent was not added: ' + str(e))
             return None
         else:
             if deTor:
-                s = 'Torrent successfully added!'
-                logger.info(s)
-                if self.log:
-                    self.log.message(s)
+                self.log('Torrent successfully added!')
                 st = self.mkSeedTor(deTor)
                 return st
             else:
+                self.log('Torrent was not added! maybe exists.')
                 return None
 
     def addTorrentUrl(self, tor_url, download_location):
@@ -338,10 +314,7 @@ class DeDownloadClient(DownloadClientBase):
                 torhash = torid.decode("utf-8")
 
             except Exception as e:
-                s = 'Torrent not added'
-                logger.debug(s)
-                if self.log:
-                    self.log.message(s)
+                self.log('Torrent not added ' + str(e))
                 return None
 
         return self.getTorrent(torhash)
@@ -359,10 +332,7 @@ class DeDownloadClient(DownloadClientBase):
             #            hash = str.lower(self.get_the_hash(filepath))
 
             #            logger.debug('Torrent Hash (load_torrent): "' + hash + '"')
-            s = 'FileName (load_torrent): ' + str(os.path.basename(filepath))
-            logger.debug(s)
-            if self.log:
-                self.log.message(s)
+            self.log('FileName (load_torrent): ' + str(os.path.basename(filepath)))
 
             t_options = {}
             t_options['add_paused'] = True
@@ -373,10 +343,7 @@ class DeDownloadClient(DownloadClientBase):
                     'core.add_torrent_file', str(os.path.basename(filepath)),
                     base64.encodestring(torrentcontent), t_options)
             except Exception as e:
-                s = 'Torrent not added'
-                logger.debug(s)
-                if self.log:
-                    self.log.message(s)
+                self.log('Torrent not added' + str(e))
                 return None
 
         return self.getTorrent(torrent_id)

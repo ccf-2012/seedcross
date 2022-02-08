@@ -38,6 +38,13 @@ def settingsView(request):
             config.jackett_url = form.cleaned_data['jackett_url']
             config.jackett_api_key = form.cleaned_data['jackett_api_key']
             config.trackers = form.cleaned_data['jackett_trackers']
+            config.skip_CJK = not form.cleaned_data['include_cjk']
+            config.category_indexers = form.cleaned_data['category_indexers']
+            config.indexer_movietv = form.cleaned_data['indexer_movietv']
+            config.indexer_music = form.cleaned_data['indexer_music']
+            config.indexer_ebook = form.cleaned_data['indexer_ebook']
+            config.indexer_audio = form.cleaned_data['indexer_audio']
+            config.indexer_other = form.cleaned_data['indexer_other']
             config.fc_count = form.cleaned_data['fc_count']
             config.fc_interval = form.cleaned_data['fc_interval']
             client.clienttype = form.cleaned_data['client_type']
@@ -64,6 +71,13 @@ def settingsView(request):
             "jackett_url": config.jackett_url,
             "jackett_api_key": config.jackett_api_key,
             "jackett_trackers": config.trackers,
+            "include_cjk": not config.skip_CJK,
+            "category_indexers": config.category_indexers,
+            "indexer_movietv": config.indexer_movietv,
+            "indexer_music": config.indexer_music,
+            "indexer_ebook": config.indexer_ebook,
+            "indexer_audio": config.indexer_audio,
+            "indexer_other": config.indexer_other,
             "fc_count": config.fc_count,
             "fc_interval": config.fc_interval,
         })

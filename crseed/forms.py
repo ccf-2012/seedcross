@@ -1,3 +1,4 @@
+from email.policy import default
 from django import forms
 from .models import CLIENT_TYPES, INDEXER_TYPES
 from crispy_forms.helper import FormHelper
@@ -12,7 +13,13 @@ class ParamSettingForm(forms.Form):
     client_username = forms.CharField(label='Username')
     client_password = forms.CharField(
         label='Password', widget=forms.PasswordInput(render_value=True))
-
+    include_cjk = forms.BooleanField(label='Search CJK title',  required=False)
+    category_indexers = forms.BooleanField(label='Category indexers',  required=False)
+    indexer_movietv = forms.CharField(label='Movie/TV indexers',  required=False)
+    indexer_music = forms.CharField(label='Music indexers',  required=False)
+    indexer_ebook = forms.CharField(label='eBook indexers',  required=False)
+    indexer_audio = forms.CharField(label='Audio indexers',  required=False)
+    indexer_other = forms.CharField(label='Other indexers',  required=False)
     jackett_prowlarr = forms.ChoiceField(label='Jackett or Prowlarr', choices=INDEXER_TYPES)
     jackett_url = forms.URLField(label='Jackett/Prowlarr Url')
     jackett_api_key = forms.CharField(label='Jackett/Prowlarr Api key')
@@ -23,24 +30,32 @@ class ParamSettingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        # self.helper.form_class = 'form-horizontal'
+        # self.helper.label_class = 'col-lg-2'
+        # self.helper.field_class = 'col-lg-8'
         self.helper.layout = Layout(
             HTML("""
             <p><strong>Download Client Setting</strong></p>
             """),
-            'client_type',
+            Field('client_type'), 
             Row(
                 Column(Field('client_host',
                              placeholder='only IP addr'),
-                       css_class='form-group col-md-8 mb-0'),
+                       css_class='form-group col-md-8 mb-0'
+                       ),
                 Column(PrependedText('client_port', ':', placeholder="Port"),
-                       css_class='form-group col-md-4 mb-0'),
+                       css_class='form-group col-md-4 mb-0'
+                       ),
                 # Column('client_port', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'),
             Row(Column('client_username',
-                       css_class='form-group col-md-6 mb-0'),
+                       css_class='form-group col-md-6 mb-0'
+                       ),
                 Column('client_password',
-                       css_class='form-group col-md-6 mb-0'),
+                       css_class='form-group col-md-6 mb-0'
+                       ),
                 css_class='form-row'),
+
             HTML("""
             <p><strong>Jackett/Prowlarr Setting</strong></p>
             """),
@@ -53,6 +68,16 @@ class ParamSettingForm(forms.Form):
             Field('jackett_trackers',
                   placeholder='leave blank to search all configured indexers'),
             HTML("""
+            <p><strong>Search options</strong></p>
+            """),
+            Field('include_cjk'),
+            Field('category_indexers'),
+            Field('indexer_movietv'),
+            Field('indexer_music'),
+            Field('indexer_ebook'),
+            Field('indexer_audio'),
+            Field('indexer_other'),
+            HTML("""
             <p><strong>Flow Control Setting</strong></p>
             """),
             Row(Column(Field('fc_count'),
@@ -60,6 +85,7 @@ class ParamSettingForm(forms.Form):
                 Column(Field('fc_interval'),
                        css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'))
+
         self.helper.add_input(
             Submit('submit', 'Save Settings', css_class='btn-primary'))
         self.helper.form_method = 'POST'
