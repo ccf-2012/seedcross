@@ -296,7 +296,7 @@ class IndexResult():
         self.imdbId = imdbId
 
 
-def genSearchKeyword(basename, size, tracker, log):
+def genSearchKeyword(basename, size, tracker, log, skip_CJK=True):
     local_release_data = {
         'basename': basename,
         'size': size,
@@ -313,14 +313,15 @@ def genSearchKeyword(basename, size, tracker, log):
 
         return []
 
-    if re.search(r'[\u4e00-\u9fa5\u3041-\u30fc]',
-                 local_release_data['guessed_data']['title']):
-        s = 'Skipped: contains CJK characters in title: {}'.format(
-            local_release_data['basename'])
-        logger.info(s)
-        log.message(s)
+    if skip_CJK:
+        if re.search(r'[\u4e00-\u9fa5\u3041-\u30fc]',
+                    local_release_data['guessed_data']['title']):
+            s = 'Skipped: contains CJK characters in title: {}'.format(
+                local_release_data['basename'])
+            logger.info(s)
+            log.message(s)
 
-        return []
+            return []
 
     return local_release_data
 
@@ -405,7 +406,7 @@ def iterTorrents(dlclient, process_param, log):
         parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
 
         searchData = genSearchKeyword(localTor.name, localTor.size,
-                                      localTor.tracker, log)
+                                      localTor.tracker, log, process_param.skip_CJK)
         if not searchData:
             continue
 
@@ -414,7 +415,7 @@ def iterTorrents(dlclient, process_param, log):
             return
         log.status(progress=for_count, query_count=query_count)
         log.message('Searching: ' +  '[ ' + cat + ' ] ' + searchData['guessed_data']['title'])
-        log.message('tortile.parseTitle = ' + parseTitle)
+        # log.message('tortile.parseTitle = ' + parseTitle)
         searcher = Searcher(process_param)
         matchingResults = searcher.search(searchData, log, cat)
         log.inc(match_count=len(matchingResults))
