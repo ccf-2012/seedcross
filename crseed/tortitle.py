@@ -244,7 +244,7 @@ def parseMovieName2(torName):
 
     titlestr = re.sub(r' +', ' ', sstr).strip()
 
-    if titlestr[-1] == ')':
+    if titlestr.endswith(')'):
         titlestr = re.sub(r'\(.*$', '', sstr).strip()
 
     cntitle = titlestr
