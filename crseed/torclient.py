@@ -126,7 +126,7 @@ class TrDownloadClient(DownloadClientBase):
             return None
         else:
             if trTor:
-                self.log('Torrent successfully added!')
+                self.log('Torrent added!')
                 st = self.mkSeedTor(trTor)
                 return st
             else:
@@ -232,7 +232,7 @@ class QbDownloadClient(DownloadClientBase):
             return None
         else:
             if qbTor:
-                self.log('Torrent successfully added!')
+                self.log('Torrent added!')
                 st = self.mkSeedTor(qbTor)
                 return st
             else:
@@ -294,7 +294,7 @@ class DeDownloadClient(DownloadClientBase):
             return None
         else:
             if deTor:
-                self.log('Torrent successfully added!')
+                self.log('Torrent added!')
                 st = self.mkSeedTor(deTor)
                 return st
             else:
