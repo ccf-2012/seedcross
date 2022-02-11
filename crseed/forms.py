@@ -24,6 +24,7 @@ class ParamSettingForm(forms.Form):
     jackett_url = forms.URLField(label='Jackett/Prowlarr Url')
     jackett_api_key = forms.CharField(label='Jackett/Prowlarr Api key')
     jackett_trackers = forms.CharField(label='Tracker / Indexer',  required=False)
+    skip_check = forms.BooleanField(label='DANGER !! Skip hash check when adding torrent, support qBittorrent & deluge. ',  required=False)
     fc_count = forms.IntegerField(label='Flow control: Count limit')
     fc_interval = forms.IntegerField(label='Flow control: Interval')
 
@@ -80,6 +81,10 @@ class ParamSettingForm(forms.Form):
                 Field('indexer_other'),
                 css_id='CategoryIndexers', 
             ), 
+            HTML("""
+            <p><strong>Torrent opiton</strong></p>
+            """),
+            Field('skip_check'),
             HTML("""
             <p><strong>Flow Control Setting</strong></p>
             """),

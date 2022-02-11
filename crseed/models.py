@@ -97,6 +97,7 @@ class ProcessParam(models.Model):
     indexer_audio = models.CharField(max_length=255, default='', null=True)
     indexer_ebook = models.CharField(max_length=255, default='', null=True)
     indexer_other = models.CharField(max_length=255, default='', null=True)
+    skip_check = models.BooleanField(default=False)
     fc_count = models.IntegerField(default=20)
     fc_interval = models.IntegerField(default=2)
 

@@ -241,6 +241,7 @@ class Searcher:
     def loadToIndexResult(self, search_results):
         index_results = []
 
+        breakpoint()
         for result in search_results:
             if self.process_param.jackett_prowlarr == 0:
                 r = IndexResult(
@@ -389,19 +390,19 @@ def saveCrossedTorrent(st, searchTor):
     return newCt
 
 
-def downloadResult(dlclient, result, localTor, log):
+def downloadResult(dlclient, result, localTor, log, skipCheck):
 
     # Jackett if result['Link'] is None:
     if result.downloadUrl is None:
-        s = 'Skipped: - Skipping release (no download link): ' + localTor.name
+        s = 'Skipped: - Skipping release (no download link): ' + result.title
         logger.info(s)
         log.message(s)
         return None
-    s = 'Grabbing release: ' + localTor.name
+    s = 'Grabbing release: ' + result.title
     logger.info(s)
     log.message(s)
     # Jackett return dlclient.addTorrentUrl(result['Link'], localTor.save_path)
-    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path)
+    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, skipCheck)
 
 
 def checkTaskCanclled():
@@ -458,7 +459,16 @@ def iterTorrents(dlclient, process_param, log):
         for result in matchingResults:
             if checkTaskCanclled() or log.abort():
                 return
-            st = downloadResult(dlclient, result, localTor, log)
+            skipCheck = False
+            if process_param.skip_check:
+                log.message('result.title =' + result.title)
+                if result.title == localTor.name:
+                    skipCheck = True
+                    s = 'SKIP_CHECK attension, torrent name match: '+ result.title
+                    print(s)
+                    logger.info(s)
+                    log.message(s)
+            st = downloadResult(dlclient, result, localTor, log, skipCheck)
             if st:
                 print(f'- Success added: {localTor.name}')
                 logger.info(f'- Success added: {localTor.name}')

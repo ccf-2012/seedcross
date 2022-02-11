@@ -45,6 +45,7 @@ def settingsView(request):
             config.indexer_ebook = form.cleaned_data['indexer_ebook']
             config.indexer_audio = form.cleaned_data['indexer_audio']
             config.indexer_other = form.cleaned_data['indexer_other']
+            config.skip_check = form.cleaned_data['skip_check']
             config.fc_count = form.cleaned_data['fc_count']
             config.fc_interval = form.cleaned_data['fc_interval']
             client.clienttype = form.cleaned_data['client_type']
@@ -78,6 +79,7 @@ def settingsView(request):
             "indexer_ebook": config.indexer_ebook,
             "indexer_audio": config.indexer_audio,
             "indexer_other": config.indexer_other,
+            "skip_check": config.skip_check,
             "fc_count": config.fc_count,
             "fc_interval": config.fc_interval,
         })
