@@ -1,6 +1,6 @@
 asgiref==3.4.1
 deluge-client==1.9.0
-Django==3.2.8
+Django==3.2.12
 django-ajax-datatable==4.3.1
 django-background-tasks==1.2.5
 django-crispy-forms==1.13.0
