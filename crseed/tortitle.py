@@ -1,3 +1,4 @@
+from distutils.spawn import spawn
 import re
 from .torcategory import cutExt
 
@@ -122,6 +123,12 @@ def get3SectionJpAniName(items, titleIndex):
 
 
 def parseMovieName(torName):
+    if torName.startswith('[') and torName.endswith('SP'):
+        m = re.search(r'\]([^]]*\+.?SP)$', torName, flags=re.I)
+        if m:
+            namestr = torName[:m.span(1)[0]]
+            return parseJpAniName(namestr)
+            
     if torName.startswith('[') and torName.endswith(']'):
         return parseJpAniName(torName)
     else:
