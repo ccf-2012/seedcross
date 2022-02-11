@@ -3,6 +3,8 @@ import os
 
 
 def cutExt(torName):
+    if not torName:
+        return ''
     tortup = os.path.splitext(torName)
     torext = tortup[1].lower()
     mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf']
@@ -124,14 +126,17 @@ class GuessCategoryUtils:
             return False
         return True
 
-    def categoryByGroup(self, group):
+    def categoryByGroup(self, torName, group):
+        filename, file_ext = os.path.splitext(torName)
+        isMediaFile = file_ext.lower() in ['.mkv', '.mp4', '.iso']
+            
         if group in self.MV_GROUPS:
             self.setCategory('MV')
         elif group in self.AUDIO_GROUPS:
             self.setCategory('Audio')
-        elif group in self.TV_GROUPS:
+        elif group in self.TV_GROUPS and not isMediaFile:
             self.setCategory('TV')
-        elif group in self.WEB_GROUPS:
+        elif group in self.WEB_GROUPS and not isMediaFile:
             self.setCategory('TV')
         elif group in self.MOVIE_ENCODE_GROUPS:
             self.setCategory('MovieEncode')
@@ -143,7 +148,7 @@ class GuessCategoryUtils:
 
     def parseGroup(self, torName):
         sstr = cutExt(torName)
-        match = re.search(r'[@\-￡]\s?(\w{3,12})\b(?!.*[@\-￡].*)$', sstr, re.I)
+        match = re.search(r'[@\-￡]\s?(\w+)\b(?!.*[@\-￡].*)$', sstr, re.I)
         if match:
             groupName = match.group(1).strip()
             if groupName.startswith('CMCT'):
@@ -218,7 +223,7 @@ class GuessCategoryUtils:
         if self.categoryByKeyword(torName):
             return self.category, self.group
 
-        if self.categoryByGroup(self.group):
+        if self.categoryByGroup(torName, self.group):
             return self.category, self.group
 
         # 非web组出的
