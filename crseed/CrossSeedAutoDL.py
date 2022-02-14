@@ -322,7 +322,7 @@ def downloadResult(dlclient, result, localTor, log):
     logger.info(s)
     log.message(s)
     # Jackett return dlclient.addTorrentUrl(result['Link'], localTor.save_path)
-    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path)
+    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, result.indexer)
 
 
 def checkTaskCanclled():
