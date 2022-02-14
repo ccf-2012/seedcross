@@ -208,7 +208,7 @@ class QbDownloadClient(DownloadClientBase):
         else:
             return None
 
-    def addTorrentUrl(self, tor_url, download_location):
+    def addTorrentUrl(self, tor_url, download_location, indexer):
         if not self.qbClient:
             self.connect()
         st = None
@@ -217,14 +217,16 @@ class QbDownloadClient(DownloadClientBase):
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
                     is_paused=True,
-                    save_path=download_location,
-                    download_path=download_location )
+                    skip_checking=True,
+                    tags="seedcross," + indexer,
+                    autoTMM=False,
+                    save_path=download_location )
                 if 'OK' in result.upper():
                     qbTor = self.findJustAdded()
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
             except Exception as e:
-                logger.debug('Torrent not added')
+                self.log('Torrent not added! Torrent already in session.')
                 return None
 
         return st
