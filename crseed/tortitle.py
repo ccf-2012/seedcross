@@ -242,14 +242,12 @@ def parseMovieName2(torName):
         flags=re.I)
     sstr = re.sub(r'\[Vol.*\]$', '', sstr, flags=re.I)
 
-    sstr = re.sub(r'\W?(IMAX|Extended Cut)\s*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'\W?(IMAX|Extended Cut)\s.*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|[A-Z]{1,5}TV)\W*', '', sstr, flags=re.I)
 
     sstr = re.sub(r'([\s\.-](\d+)?CD[\.-]WEB|[\s\.-](\d+)?CD[\.-]FLAC|[\s\.-][\[\(\{]FLAC[\]\)\}]).*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'\bFLAC\b.*$', '', sstr, flags=re.I)
 
-    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|[A-Z]{1,5}TV)\W*',
-                  '',
-                  sstr,
-                  flags=re.I)
 
     sstr = re.sub(r'^\W?CC_?\b', '', sstr, flags=re.I)
     if sstr[-1] in ['(', '[', '{']:
