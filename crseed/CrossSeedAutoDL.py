@@ -193,6 +193,7 @@ class Searcher:
                 'episode':
                 local_release_data['guessed_data'].get('episode')
             }
+
         indexerUrl = None
         if self.process_param.category_indexers and category:
             if categoryMovieTV(category):
@@ -218,6 +219,7 @@ class Searcher:
         else:
             if self.process_param.trackers.strip():
                 indexerUrl = self.process_param.trackers
+                optional_params['Tracker[]'] = indexerUrl
 
         for param, arg in optional_params.items():
             if arg is not None:
@@ -339,8 +341,8 @@ def genSearchKeyword(basename, size, tracker, log, skip_CJK=True, parseTitle='')
     }
 
     # # TODO: use parseTitle
-    # if parseTitle:
-    #     local_release_data['guessed_data']['title'] = parseTitle
+    if parseTitle:
+        local_release_data['guessed_data']['title'] = parseTitle
 
     if local_release_data['guessed_data'].get('title') is None:
         s = 'Skipped: Could not get title from filename: {}'.format(
@@ -445,12 +447,15 @@ def iterTorrents(dlclient, process_param, log):
         catutil = GuessCategoryUtils()
         cat, group = catutil.guessByName(localTor.name)
 
+        log.message('Torrent: [ {} ] {}'.format(cat, localTor.name))
         # # TODO: use parseTitle
-        # parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
-        # log.message('Parse: {}, {} {} {}'.format(parseTitle, parseYear, parseSeason, parseEpisode))
-        log.message('Searching: [ {} ] {}'.format(cat, localTor.name))
+        parseTitle, parseYear, parseSeason, parseEpisode, cntitle = parseMovieName(localTor.name)
+        log.message('Searching: {} {} {} {}'.format(parseTitle, parseYear, parseSeason, parseEpisode))
         searchData = genSearchKeyword(localTor.name, localTor.size,
-                                      localTor.tracker, log, process_param.skip_CJK)
+                                      localTor.tracker, log, process_param.skip_CJK, parseTitle)
+        # # use guessit
+        # searchData = genSearchKeyword(localTor.name, localTor.size,
+        #                               localTor.tracker, log, process_param.skip_CJK)
 
         if not searchData:
             continue

@@ -24,13 +24,13 @@ class GuessCategoryUtils:
     # def __init__(self):
     # 有些组生产 TV Series，但是在种子名上不显示 S01 这些
     TV_GROUPS = ['CMCTV', 'FLTTH']
-    WEB_GROUPS = ['CHDWEB', 'PTERWEB', 'HARESWEB', 'DBTV', 'QHSTUDIO', 
-                 'LEAGUEWEB', 'HDCTV', '52KHD', 'PTHWEB', 'OURTV', 'ILOVETV']
+    WEB_GROUPS = ['CHDWEB', 'PTerWEB', 'HaresWEB', 'DBTV', 'QHStudio', 
+                 'LeagueWEB', 'HDCTV', '52KHD', 'PTHweb', 'OURTV', 'iLoveTV']
 
     # 有些组专门生产 MV
-    MV_GROUPS = ['PTERMV', 'FHDMV', 'MELON', 'HARESMV', 'BUGS!']
+    MV_GROUPS = ['PTerMV', 'FHDMv', 'Melon', 'HaresMV', 'Bugs!']
     # 有些组专门生产 Audio
-    AUDIO_GROUPS = ['PTHAUDIO', 'HDSAB']
+    AUDIO_GROUPS = ['PTHAudio', 'HDSAB']
     # 有些组专门作压制，但是不在种子名上标记
     MOVIE_ENCODE_GROUPS = ['CMCT', 'FRDS']
 
@@ -126,15 +126,21 @@ class GuessCategoryUtils:
             return False
         return True
 
-    def categoryByGroup(self, torName, group):
-        filename, file_ext = os.path.splitext(torName)
-        isMediaFile = file_ext.lower() in ['.mkv', '.mp4', '.iso']
-            
+    def categoryMVAudioGroup(self, torName, group):
         if group in self.MV_GROUPS:
             self.setCategory('MV')
         elif group in self.AUDIO_GROUPS:
             self.setCategory('Audio')
-        elif group in self.TV_GROUPS and not isMediaFile:
+        else:
+            return False
+        return True
+
+
+    def categoryByGuessGroup(self, torName, group):
+        filename, file_ext = os.path.splitext(torName)
+        isMediaFile = file_ext.lower() in ['.mkv', '.mp4', '.iso']
+            
+        if group in self.TV_GROUPS and not isMediaFile:
             self.setCategory('TV')
         elif group in self.WEB_GROUPS and not isMediaFile:
             self.setCategory('TV')
@@ -143,7 +149,6 @@ class GuessCategoryUtils:
         else:
             return False
         return True
-
 
 
     def parseGroup(self, torName):
@@ -214,6 +219,10 @@ class GuessCategoryUtils:
         self.group = self.parseGroup(torName)
         self.quality = self.getSource(torName)
         self.resolution = self.getResolution(torName)
+
+        if self.categoryMVAudioGroup(torName, self.group):
+            return self.category, self.group
+
         if self.categoryByExt(torName):
             return self.category, self.group
 
@@ -223,7 +232,7 @@ class GuessCategoryUtils:
         if self.categoryByKeyword(torName):
             return self.category, self.group
 
-        if self.categoryByGroup(torName, self.group):
+        if self.categoryByGuessGroup(torName, self.group):
             return self.category, self.group
 
         # 非web组出的
