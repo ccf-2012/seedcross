@@ -1,4 +1,3 @@
-from distutils.spawn import spawn
 import re
 from .torcategory import cutExt
 
@@ -21,6 +20,12 @@ def cutAKA(titlestr):
         titlestr = titlestr.split(m.group(0))[0]
     return titlestr.strip()
 
+def cutAKAJP(titlestr):
+    m = re.search(r'(/|\bAKA\b)', titlestr, re.I)
+    if m:
+        titlestr = titlestr.split(m.group(0))[0]
+    return titlestr.strip()
+
 
 def getIndexItem(items, index):
     if index >= 0 and index < len(items):
@@ -28,7 +33,7 @@ def getIndexItem(items, index):
     else:
         return ''
 
-def is0Dayname(itemstr):
+def is0DayName(itemstr):
     # CoComelon.S03.1080p.NF.WEB-DL.DDP2.0.H.264-NPMS
     m = re.match(r'^\w+.*\b(BluRay|Blu-?ray|720p|1080[pi]|2160p|576i|WEB-DL|\.DVD\.|WEBRip|HDTV)\b.*', itemstr, flags=re.A | re.I)
     return m
@@ -44,96 +49,95 @@ def getNoBracketedStr(torName, items):
 
     return ss
 
+def cutBracketedTail(sstr):
+    m = re.search(r'^\w+.*(\[[^]]*\]?)', sstr)
+    if m:
+        sstr = sstr[:m.span(1)[0]]
+    return sstr
+
 
 def parseJpAniName(torName):
-    items = re.findall(r'\[([^]]*)\]', torName)
+    yearstr, yearspan = parseYear(torName)
+
+    items = re.findall(r'\[([^]]*[^[]*)\]', torName)
 
     if len(items) < 2:
-        return parseMovieName2(torName)
+        return parse0DayMovieName(torName)
 
     for s in items:
-        if is0Dayname(s):
-            return parseMovieName2(s)
+        if is0DayName(s):
+            return parse0DayMovieName(s)
 
     strLeft = getNoBracketedStr(torName, items)
-
-    if items[0] in ['BDMV', 'EAC', 'XLD']:
-        items.pop(0)
     if len(strLeft) > 0:
-        return getUnbracketedTitle(strLeft, items)
+        # yearstr, titlestr = getYearStr(torName)
+        titlestr = bracketToBlank(strLeft)
+        return cutAKAJP(titlestr), yearstr, '', '', ''
+
+    jptitles = []
+    titlestrs = []
+    jptitle = ''
+    titlestr = ''
+    for item in items:
+        if re.match(r'^(BDMV|EAC|XLD|1080[pi]|MOVIE|DISC|Vol|MPEG|ALBUM|SBCV|FLAC|SINGLE|V\.A|VVCL)', item, re.A | re.I):
+            continue
+        if re.match(r'^\d+$', item):
+            continue
+        
+        if containsCJK(item):
+            jptitles.append(item) 
+        else:
+            titlestrs.append(item)
+
+    if len(titlestrs) > 0:
+        titlestr = titlestrs[0]
+        # titlestr = max(titlestrs, key=len)
+        if jptitles:
+            jptitle = max(jptitles, key=len)
     else:
-        titleIndex = -1
-        if isFullAscii(items[0]):
-            titleIndex = 0
-        elif isFullAscii(items[1]) and not notTitle(items[1]):
-            titleIndex = 1
+        if jptitles:
+            jptitle = max(jptitles, key=len)
+            titlestr = jptitle
+        else:
+            pass
+            # raise 'Some thing Wrong'
 
-    if titleIndex >= 0:
-        return get3SectionJpAniName(items, titleIndex)
-    else:
-        return get1SectionJpAniName(items)
-
-
-def getUnbracketedTitle(strLeft, items):
-    yearstr, titlestr = getYearStr(strLeft)
+    titlestr = cutBracketedTail(titlestr)
     titlestr = bracketToBlank(titlestr)
 
-    return cutAKA(titlestr), yearstr, '', '', ''
+    return cutAKAJP(titlestr), yearstr, '', '', jptitle
 
 
-def get1SectionJpAniName(items):
-    m = re.search(r'\(([\x00-\x7F]*)\)', items[0], re.A)
-    if m:
-        titlestr = m[1]
-        yearstr, titlestr = getYearStr(titlestr)
-    else:
-        titlestr = items[0]
-    titlestr = bracketToBlank(titlestr)
 
-    return cutAKA(titlestr), yearstr, '', '', ''
+# def get3SectionJpAniName(items, titleIndex):
+#     prevstr = getIndexItem(items, titleIndex - 1)
+#     if prevstr and containsCJK(prevstr):
+#         cntitle = prevstr
+#     else:
+#         cntitle = ''
 
+#     titlestr = getIndexItem(items, titleIndex)
 
-def getYearStr(str):
-    myear = re.search(r'\b((19\d{2}\b|20\d{2})-?(19\d{2}|20\d{2})?)\b', str)
-    if myear:
-        yearstr = myear.group(1)
-        titlestr = re.sub(r'\(?' + yearstr + r'\)?', '', str)
-    else:
-        yearstr = ''
-        titlestr = str
-    return yearstr, titlestr
+#     nextstr = getIndexItem(items, titleIndex + 1)
+#     if nextstr and containsCJK(nextstr):
+#         jptitle = nextstr
+#         jptitleIndex = titleIndex + 1
+#     else:
+#         jptitle = ''
+#         jptitleIndex = titleIndex
 
+#     nextstr2 = getIndexItem(items, jptitleIndex + 1)
+#     if re.search(r'\b((19\d{2}\b|20\d{2})-?(19\d{2}|20\d{2})?)\b', nextstr2):
+#         yearstr = nextstr2
+#     else:
+#         yearstr, titlestr = getYearStr(titlestr)
+#     seasonstr = ''
+#     episodestr = ''
 
-def get3SectionJpAniName(items, titleIndex):
-    prevstr = getIndexItem(items, titleIndex - 1)
-    if prevstr and containsCJK(prevstr):
-        cntitle = prevstr
-    else:
-        cntitle = ''
+#     titlestr = bracketToBlank(titlestr)
 
-    titlestr = getIndexItem(items, titleIndex)
+#     return cutAKA(titlestr), yearstr, seasonstr, episodestr, cntitle
 
-    nextstr = getIndexItem(items, titleIndex + 1)
-    if nextstr and containsCJK(nextstr):
-        jptitle = nextstr
-        jptitleIndex = titleIndex + 1
-    else:
-        jptitle = ''
-        jptitleIndex = titleIndex
-
-    nextstr2 = getIndexItem(items, jptitleIndex + 1)
-    if re.search(r'\b((19\d{2}\b|20\d{2})-?(19\d{2}|20\d{2})?)\b', nextstr2):
-        yearstr = nextstr2
-        # seasonstr = getIndexItem(items, jptitleIndex+2)
-    else:
-        yearstr, titlestr = getYearStr(titlestr)
-        # seasonstr = getIndexItem(items, jptitleIndex+1)
-    seasonstr = ''
-    episodestr = ''
-
-    titlestr = bracketToBlank(titlestr)
-
-    return cutAKA(titlestr), yearstr, seasonstr, episodestr, cntitle
 
 def bracketToBlank(sstr):
     dilimers = ['(', ')', '-']
@@ -152,7 +156,7 @@ def parseMovieName(torName):
     if torName.startswith('[') and torName.endswith(']'):
         return parseJpAniName(torName)
     else:
-        return parseMovieName2(torName)
+        return parse0DayMovieName(torName)
 
 def parseSeason(sstr):
     seasonstr = ''
@@ -232,7 +236,7 @@ def cutspan(sstr, ifrom, ito):
     return sstr
 
 
-def parseMovieName2(torName):
+def parse0DayMovieName(torName):
     sstr = cutExt(torName)
 
     sstr = re.sub(
@@ -242,14 +246,12 @@ def parseMovieName2(torName):
         flags=re.I)
     sstr = re.sub(r'\[Vol.*\]$', '', sstr, flags=re.I)
 
-    sstr = re.sub(r'\W?(IMAX|Extended Cut)\s*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'\W?(IMAX|Extended Cut)\s.*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|[A-Z]{1,5}TV)\W*', '', sstr, flags=re.I)
 
     sstr = re.sub(r'([\s\.-](\d+)?CD[\.-]WEB|[\s\.-](\d+)?CD[\.-]FLAC|[\s\.-][\[\(\{]FLAC[\]\)\}]).*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'\bFLAC\b.*$', '', sstr, flags=re.I)
 
-    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|[A-Z]{1,5}TV)\W*',
-                  '',
-                  sstr,
-                  flags=re.I)
 
     sstr = re.sub(r'^\W?CC_?\b', '', sstr, flags=re.I)
     if sstr[-1] in ['(', '[', '{']:
