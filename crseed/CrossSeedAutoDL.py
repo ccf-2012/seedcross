@@ -277,6 +277,8 @@ class Searcher:
             # older torrents' sizes in blutopia are are slightly off
             if result.indexer == 'Blutopia':
                 max_size_difference *= 2
+            if result.size < 1500 * self.MiB:
+                max_size_difference = 2048
 
             m = re.match(local_release_data['tracker'], result.indexer, re.I)
             if m:
