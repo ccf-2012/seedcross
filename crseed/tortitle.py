@@ -79,7 +79,7 @@ def parseJpAniName(torName):
     jptitle = ''
     titlestr = ''
     for item in items:
-        if re.match(r'^(BDMV|EAC|XLD|1080[pi]|MOVIE|DISC|Vol|MPEG|ALBUM|SBCV|FLAC|SINGLE|V\.A|VVCL)', item, re.A | re.I):
+        if re.match(r'^(BDMV|EAC|XLD|1080[pi]|MOVIE|DISC|Vol\.?\d+|MPEG|合集|ALBUM|SBCV|FLAC|SINGLE|V\.A|VVCL)\b', item, re.A | re.I):
             continue
         if re.match(r'^\d+$', item):
             continue
@@ -96,6 +96,7 @@ def parseJpAniName(torName):
             jptitle = max(jptitles, key=len)
     else:
         if jptitles:
+            # jptitle = jptitles[0]
             jptitle = max(jptitles, key=len)
             titlestr = jptitle
         else:
@@ -140,7 +141,7 @@ def parseJpAniName(torName):
 
 
 def bracketToBlank(sstr):
-    dilimers = ['(', ')', '-']
+    dilimers = ['(', ')', '-', '–', '_', '+']
     for dchar in dilimers:
         sstr = sstr.replace(dchar, ' ')
     return re.sub(r' +', ' ', sstr).strip()
@@ -246,8 +247,9 @@ def parse0DayMovieName(torName):
         flags=re.I)
     sstr = re.sub(r'\[Vol.*\]$', '', sstr, flags=re.I)
 
-    sstr = re.sub(r'\W?(IMAX|Extended Cut)\s.*$', '', sstr, flags=re.I)
-    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|[A-Z]{1,5}TV)\W*', '', sstr, flags=re.I)
+    sstr = re.sub(r'\W?(IMAX|Extended Cut|\d+CD)\b.*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'[[(](BD\d+|WAV\d*|FLAC|Live|DSD\s?\d*)\b.*$', '', sstr, flags=re.I)
+    sstr = re.sub(r'^\W?(BDMV|\BDRemux|\bCCTV\d(HD)?|BD\-?\d*|[A-Z]{1,5}TV)\W*', '', sstr, flags=re.I)
 
     sstr = re.sub(r'([\s\.-](\d+)?CD[\.-]WEB|[\s\.-](\d+)?CD[\.-]FLAC|[\s\.-][\[\(\{]FLAC[\]\)\}]).*$', '', sstr, flags=re.I)
     sstr = re.sub(r'\bFLAC\b.*$', '', sstr, flags=re.I)
