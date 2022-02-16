@@ -76,7 +76,7 @@ class GuessCategoryUtils:
             self.setCategory('Music')
         elif re.search(r'(\b|_)(BD25\b|BD50\b|BD66\b|BD$)', torName, re.I):
             self.setCategory('MovieBDMV')
-        elif re.search(r'(\b|_)(DVD(\d+)?)\b', torName, re.I):
+        elif re.search(r'(\b|_)(DVDR|DVD(\d+)?)\b', torName, re.I):
             self.setCategory('MovieDVD')
         else:
             return False
@@ -153,12 +153,14 @@ class GuessCategoryUtils:
 
     def parseGroup(self, torName):
         sstr = cutExt(torName)
-        match = re.search(r'[@\-￡]\s?(\w+)\b(?!.*[@\-￡].*)$', sstr, re.I)
+        match = re.search(r'[@\-￡]\s?(\w+)(?!.*[@\-￡].*)$', sstr, re.I)
         if match:
             groupName = match.group(1).strip()
-            if groupName.startswith('CMCT'):
-                if not groupName.startswith('CMCTV'):
-                    groupName = 'CMCT'
+            # # TODO: BD-50_A_PORTRAIT_OF_SHUNKIN_1976_BC
+            if match.span(1)[0] < 4:
+                return None
+            if groupName.startswith('CMCT') and not groupName.startswith('CMCTV'):
+                groupName = 'CMCT'
             return groupName
 
         return None
@@ -171,10 +173,10 @@ class GuessCategoryUtils:
             return ''
 
     def getSource(self, torName):
-        match = re.search(r'\b(Blu[\-\. ]?Ray|WEB[\-\. ]?DL|WEBRip)\b', torName, re.A | re.I)
+        match = re.search(r'\b(Blu[\-\. ]?Ray|WEB|WEB[\-\. ]?DL|WEBRip|^BD([-. ]\d)*|BD$)\b', torName, re.A | re.I)
         if match:
-            groupstr = match.group(0).strip().lower()
-            if 'blu' in groupstr:
+            # mediaSource = match.group(0).strip().lower()
+            if re.search(r'(\bBlu|\bBD)', match.group(0), flags=re.A | re.I):
                 return 'BLURAY'
             else:
                 return 'WEBDL'
