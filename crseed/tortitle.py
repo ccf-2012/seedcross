@@ -258,7 +258,7 @@ def parse0DayMovieName(torName):
 
 
     sstr = re.sub(r'^\W?CC_?\b', '', sstr, flags=re.I)
-    if sstr[-1] in ['(', '[', '{']:
+    if sstr and sstr[-1] in ['(', '[', '{']:
         sstr = sstr[:-1]
 
     dilimers = ['[', ']', '.', '{', '}', '_', ',']
