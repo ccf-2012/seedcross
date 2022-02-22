@@ -7,8 +7,8 @@ def cutExt(torName):
         return ''
     tortup = os.path.splitext(torName)
     torext = tortup[1].lower()
-    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf']
-    if torext in mvext:
+    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf', '.iso', '.7z', '.rar']
+    if torext.lower() in mvext:
         return tortup[0].strip()
     else:
         return torName
@@ -70,6 +70,10 @@ class GuessCategoryUtils:
                 r'(pdf|epub|mobi|txt|chm|azw3|CatEDU|eBook-\w{4,8}|mobi|doc|docx).?$',
                 torName, re.I):
             self.setCategory('eBook')
+        elif re.search(
+                r'(zip|7z|rar).?$',
+                torName, re.I):
+            self.setCategory('Other')
         elif re.search(r'\.(mpg)\b', torName, re.I):
             self.setCategory('MV')
         elif re.search(r'(\b|_)(FLAC.{0,3}|DSF.{0,3}|DSD(\d{1,3})?)$', torName, re.I):
@@ -93,13 +97,18 @@ class GuessCategoryUtils:
             self.setCategory('MV')
         elif re.search(r'\bBugs!.?\.mp4', torName, re.I):
             self.setCategory('MV')
-        elif re.search(r'(\bVarious Artists|\bMQA\b|整轨|\b分轨|\b无损|\bLPCD|\bSACD|XRCD\d{1,3})',
+        elif re.search(r'(\bVarious Artists|\bMQA\b|整轨|\b分轨|\b无损|\bLPCD|\bSACD|\bMP3|XRCD\d{1,3})',
                        torName, re.A | re.I):
             self.setCategory('Music')
-        elif re.search(r'(\b\d+ ?CD|24-96|24\-192|24\-44\.1|FLAC.*24bit|FLAC.*44|FLAC.*48|WAV.*CUE|FLAC.*CUE|\[FLAC\]|FLAC.+WEB\b|FLAC.*Album|CD[\s-]+FLAC|FLAC[\s-]+CD)', torName, re.A | re.I):
+        elif re.search(r'(\b\d+ ?CD|(\[|\()\s*(16|24)\b|\-(44\.1|88.2|48|192)|24Bit|44\s*\]|FLAC.*(16|24|48|CUE|WEB|Album)|WAV.*CUE|CD.*FLAC|(\[|\()\s*FLAC)', torName, re.A | re.I):
+        # elif re.search(r'(\b\d+ ?CD|24\-|\-44\.1|24Bit|\[[\d\s]*44\s*\]|FLAC.*44|FLAC.*48|WAV.*CUE|FLAC.*CUE|\[.*FLAC\]|FLAC.+WEB\b|FLAC.*Album|CD[\s-]+FLAC|FLAC[\s-]+CD)', torName, re.A | re.I):
+            self.setCategory('Music')
+        elif re.search(r'^(Beethoven|Schubert)\s*[\-_]', torName, re.I):
             self.setCategory('Music')
         elif re.search(r'(乐团|交响曲|协奏曲|奏鸣曲|[二三四]重奏|专辑\b)', torName):
             self.setCategory('Music')
+        elif re.search(r'(\[BDMV\])', torName, re.I):
+            self.setCategory('MovieBDMV')
         elif re.search(r'(\bThe.Movie.\d{4}|电影版)\b', torName, flags=re.A | re.I):
             if self.quality == 'WEBDL':
                 self.setCategory('MovieWebdl')
@@ -110,9 +119,7 @@ class GuessCategoryUtils:
         return True
 
     def categoryTvByName(self, torName):
-        if re.search(r'\bHDTV\b', torName):
-            self.setCategory('HDTV')
-        elif re.search(r'(\b(S\d+)(E\d+)?|(Ep?\d+-Ep?\d+))\b', torName, flags=re.A | re.I):
+        if re.search(r'(\b(S\d+)(E\d+)?|(Ep?\d+-Ep?\d+))\b', torName, flags=re.A | re.I):
             self.setCategory('TV')
         elif re.search(r'(第\s*(\d+)(-\d+)?季)\b', torName, flags=re.I):
             self.setCategory('TV')
@@ -120,6 +127,8 @@ class GuessCategoryUtils:
             self.setCategory('TV')
         elif re.search(r'\W[ES]\d+\W|EP\d+\W|\d+季|第\w{1,3}季\W', torName, re.A | re.I):
             self.setCategory('TV')
+        elif re.search(r'\bHDTV\b', torName):
+            self.setCategory('HDTV')
         elif re.search(r'Complete.+Web-?dl|Full.Season|全\d+集|\d+集全', torName, re.A | re.I):
             self.setCategory('TV')
         else:
@@ -188,15 +197,17 @@ class GuessCategoryUtils:
         if self.quality == 'BLURAY':
             # Remux, 压制 还是 原盘
             if re.search(r'\WREMUX\W', torName, re.I):
-                if self.resolution == '2160p':
-                    self.setCategory('Movie4K')
-                else:
-                    self.setCategory('MovieRemux')
+                # if self.resolution == '2160p':
+                #     self.setCategory('Movie4K')
+                # else:
+                #     self.setCategory('MovieRemux')
+                self.setCategory('MovieRemux')
             elif re.search(r'\b(x265|x264)\b', torName, re.I):
-                if self.resolution == '2160p':
-                    self.setCategory('Movie4K')
-                else:
-                    self.setCategory('MovieEncode')
+                # if self.resolution == '2160p':
+                #     self.setCategory('Movie4K')
+                # else:
+                #     self.setCategory('MovieEncode')
+                self.setCategory('MovieEncode')
             else:
                 if self.resolution == '2160p':
                     self.setCategory('MovieBDMV4K')
@@ -204,10 +215,11 @@ class GuessCategoryUtils:
                     self.setCategory('MovieBDMV')
         # 来源是 WEB-DL
         elif self.quality == 'WEBDL': 
-            if self.resolution == '2160p':
-                self.setCategory('MovieWeb4K')
-            else:
-                self.setCategory('MovieWebdl')
+            # if self.resolution == '2160p':
+            #     self.setCategory('MovieWeb4K')
+            # else:
+            #     self.setCategory('MovieWebdl')
+            self.setCategory('MovieWebdl')
         else:
             if re.search(r'\WREMUX\W', torName, re.I):
                 self.setCategory('MovieRemux')
