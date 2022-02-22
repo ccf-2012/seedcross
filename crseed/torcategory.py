@@ -7,8 +7,9 @@ def cutExt(torName):
         return ''
     tortup = os.path.splitext(torName)
     torext = tortup[1].lower()
-    mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf', '.iso', '.7z', '.rar']
-    if torext.lower() in mvext:
+    if re.match(r'\.[0-9a-z]{2,8}$', torext, flags=re.I):
+    # mvext = ['.mkv', '.ts', '.m2ts', '.vob', '.mpg', '.mp4', '.3gp', '.mov', '.tp', '.zip', '.pdf', '.iso', '.ass', '.srt', '.7z', '.rar']
+    # if torext.lower() in mvext:
         return tortup[0].strip()
     else:
         return torName
