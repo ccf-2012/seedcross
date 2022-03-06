@@ -9,8 +9,10 @@ def isFullAscii(str):
 def containsCJK(str):
     return re.search(r'[\u4e00-\u9fa5\u3041-\u30fc]', str)
 
+
 def containdCJKKeyword(str):
     return re.search(r'^(.迪士尼\b)', str)
+
 
 def notTitle(str):
     return re.search(r'^(BDMV|1080[pi]|MOVIE|DISC|Vol)', str, re.A | re.I)
@@ -150,7 +152,8 @@ def parseSeason(sstr):
         sstr = sstr.replace(seasonstr, '')
         return seasonstr, seasonspan, episodestr
 
-    m2 = re.search(r'(\b(S\d+)([\. ]?Ep?\d+)?)\b', sstr, flags=re.A | re.I)
+    # m2 = re.search(r'(\b(S\d+)([\. ]?(\d{4}[\s\.])?Ep?\d+)?)\b(?!.*S\d+)', sstr, flags=re.A | re.I)
+    m2 = re.search(r'(\b(S\d+)([\. ]?(\d{4}[\s\.])?Ep?\d+)?)\b', sstr, flags=re.A | re.I)
     if m2:
         seasonstr = m2.group(1)
         seasonspan = m2.span(1)
@@ -201,7 +204,7 @@ def parseYear(sstr):
         yearspan = m2.span(1)
         if re.search(r'[\(\[\{]' + yearstr+r'\b', sstr):
             # sstr = sstr[:yearspan[0] - 1]
-            yearspan = [yearspan[0]-1, yearspan[1]+1 ]
+            yearspan = [yearspan[0]-1, yearspan[1]+1]
         # elif re.search(r'\w.*' + yearstr+r'\b', sstr):
         #     sstr = sstr[:yearspan[0]]
 
@@ -238,7 +241,6 @@ def parse0DayMovieName(torName):
     sstr = re.sub(r'^\W?CC_?\b', '', sstr, flags=re.I)
     if sstr and sstr[-1] in ['(', '[', '{']:
         sstr = sstr[:-1]
-
     sstr = delimerToBlank(sstr)
     if sstr:
         failsafeTitle = sstr
@@ -268,30 +270,40 @@ def parse0DayMovieName(torName):
     if not skipcut:
         sstr = cutspan(sstr, seasonspan[0], seasonspan[1])
         sstr = cutspan(sstr, yearspan[0], yearspan[1])
+    if sstr:
+        failsafeTitle = sstr
 
-    sstr = re.sub(r'\b(剧集|全\d集|\d集全|国语|BD\d*)$', '', sstr, flags=re.I)
+    sstr = re.sub(r'(\b剧集|\b全\d+集|\b\d+集全|\b\w+(影|场|念|港)版|\b国语|\bDis[kc]\s*\d*|\bBD\d*).*$', '', sstr, flags=re.I)
 
     if sstr and sstr[-1] in ['(', '[', '{', '（', '【']:
         sstr = sstr[:-1]
 
     # if titlestr.endswith(')'):
     #     titlestr = re.sub(r'\(.*$', '', sstr).strip()
-
-    cntitle = sstr
-    # m = re.search(r'^.*[^\x00-\x7F](S\d+|\s|\.|\d|-|\))*\b(?=[a-zA-Z])', sstr, flags=re.A)
-    # m = re.search( r'^.*[^a-zA-Z_\- &0-9](S\d+|\s|\.|\d|-)*\b(?=[A-Z])', titlestr, flags=re.A)
-    m = re.search(r'^.*[\u4e00-\u9fa5\u3041-\u30fc](S\d+|\s|\.|\d|-|\))*\b(?=[a-zA-Z])',
-                  sstr, flags=re.A)
-    if m:
-        # ['(', ')', '-', '–', '_', '+']
-        cntitle = m.group(0)
-        if not re.search(r'\s[\-\+]\s', cntitle):
-            # if len(sstr)-len(cntitle) > 4:
-            sstr = sstr.replace(cntitle, '')
+    cntitle = ''
+    if containsCJK(sstr):
+        cntitle = sstr
+        # m = re.search(r'^.*[^\x00-\x7F](S\d+|\s|\.|\d|-|\))*\b(?=[a-zA-Z])', sstr, flags=re.A)
+        # m = re.search( r'^.*[^a-zA-Z_\- &0-9](S\d+|\s|\.|\d|-)*\b(?=[A-Z])', titlestr, flags=re.A)
+        m = re.search(r'^.*[\u4e00-\u9fa5\u3041-\u30fc](S\d+|\s|\.|\d|-|\))*\b(?=[a-zA-Z])',
+                    sstr, flags=re.A)
+        if m:
+            # ['(', ')', '-', '–', '_', '+']
+            cntitle = m.group(0)
+            if not re.search(r'\s[\-\+]\s', cntitle):
+                # if len(sstr)-len(cntitle) > 4:
+                sstr = sstr.replace(cntitle, '')
+        else:
+            m = re.search(r'^([\w\s]+)\s([\u4e00-\u9fa5\u3041-\u30fc]+)\s*$',sstr, flags=re.A)
+            if m:
+                cntitle = m.group(1)
+                if not re.search(r'\s[\-\+]\s', cntitle):
+                    sstr = sstr.replace(cntitle, '')
+        cntitle = cntitle.strip()
 
     titlestr = bracketToBlank(sstr)
     titlestr = cutAKA(titlestr)
-    if len(titlestr) == 0:
+    if not containsCJK(titlestr) and len(titlestr) < 3:
         titlestr = bracketToBlank(failsafeTitle)
 
     return titlestr, yearstr, seasonstr, episodestr, cntitle
