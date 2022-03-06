@@ -52,6 +52,7 @@ class GuessCategoryUtils:
         'MovieBDMV': ['MovieBDMV', '35', 0, 'MovieBDMV'],  # 原盘, 适合播放机 & kodi
         'MovieBDMV4K': ['MovieBDMV4K', '35', 0, 'MovieBDMV4K'],
         'MovieDVD': ['MovieDVD', '35', 0, 'MovieDVD'],
+        'Movie': ['Movie', '35', 0, 'Movie'],
         'HDTV': ['HDTV', '33', 0, 'HDTV'],
         'Other': ['Other', '33', 0, 'Others']
     }
@@ -94,7 +95,7 @@ class GuessCategoryUtils:
         elif re.search(r'(\d+册|\d+期|\d+版|\d+本|\d+年|\d+月|系列|全集|作品集).?$',
                        torName):
             self.setCategory('eBook')
-        elif re.search(r'(\bConcert|演唱会|音乐会|\bLive[. ]At)\b', torName, re.A | re.I):
+        elif re.search(r'(\bConcert|演唱会|音乐会|\bLive[. ](At|in))\b', torName, re.A | re.I):
             self.setCategory('MV')
         elif re.search(r'\bBugs!.?\.mp4', torName, re.I):
             self.setCategory('MV')
@@ -254,8 +255,11 @@ class GuessCategoryUtils:
         if self.categoryByQuality(torName):
             return self.category, self.group
         else:
-            # Other的条件： TV/MV/Audio都匹配不上，quality没标记，各种压制组也对不上
-            self.setCategory('Other')
+            if self.resolution or self.quality:
+                self.setCategory('Movie')
+            else:
+                # Other的条件： TV/MV/Audio都匹配不上，quality没标记，各种压制组也对不上
+                self.setCategory('Other')
             return self.category, self.group
 
     def getSummary(self):
