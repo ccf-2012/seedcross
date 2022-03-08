@@ -190,6 +190,7 @@ class Searcher:
                     infoUrl=result['Details'],
                     size=result['Size'],
                     imdbId=result['Imdb'],
+                    TrackerType=result['TrackerType'],
                 )
             elif self.process_param.jackett_prowlarr == 1:
                 r = IndexResult(
@@ -200,10 +201,10 @@ class Searcher:
                     infoUrl=result['infoUrl'],
                     size=result['size'],
                     imdbId=result['imdbId'],
+                    TrackerType=result['TrackerType'],
                 )
 
-            index_results.append(r)
-        return index_results
+
 
     def _get_matching_results(self, local_release_data, index_result, log):
         matching_results = []
@@ -241,7 +242,7 @@ class Searcher:
 
 class IndexResult():
     def __init__(self, indexer, categories, title, downloadUrl, infoUrl, size,
-                 imdbId):
+                 imdbId, TrackerType):
         self.indexer = indexer
         self.categories = categories
         self.title = title
@@ -249,6 +250,7 @@ class IndexResult():
         self.infoUrl = infoUrl
         self.size = size
         self.imdbId = imdbId
+        self.TrackerType = TrackerType
 
 
 def genSearchKeyword(basename, size, tracker, log):
