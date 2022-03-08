@@ -204,7 +204,11 @@ class Searcher:
                     TrackerType=result['TrackerType'],
                 )
 
+            # skipping result if its from a public tracker/indexer
+            if r.TrackerType != "public":
+                index_results.append(r)
 
+        return index_results
 
     def _get_matching_results(self, local_release_data, index_result, log):
         matching_results = []
