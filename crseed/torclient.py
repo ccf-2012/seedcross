@@ -275,7 +275,7 @@ class DeDownloadClient(DownloadClientBase):
             added_date=datetime.utcfromtimestamp(
                 deTor[b'time_added']).replace(tzinfo=pytz.utc),
             status=deTor[b'state'].decode("utf-8"),
-            save_path=deTor[b'download_location'].decode("utf-8"),
+            save_path=deTor[b'save_path'].decode("utf-8"),
         )
         return st
 
@@ -285,7 +285,7 @@ class DeDownloadClient(DownloadClientBase):
 
             # deTor1 = self.get_torrent(tor_hash)
             deTor = self.deClient.call('core.get_torrent_status', tor_hash, [
-                'name', 'hash', 'download_location', 'total_size',
+                'name', 'hash', 'save_path', 'total_size',
                 'tracker_host', 'time_added', 'state'
             ])
 
@@ -308,7 +308,7 @@ class DeDownloadClient(DownloadClientBase):
         if self.deClient:
             t_options = {}
             t_options['add_paused'] = True
-            t_options['download_location'] = download_location
+            t_options['save_path'] = download_location
             try:
                 torid = self.deClient.call('core.add_torrent_url', tor_url,
                                            t_options)
@@ -337,7 +337,7 @@ class DeDownloadClient(DownloadClientBase):
 
             t_options = {}
             t_options['add_paused'] = True
-            t_options['download_location'] = download_location
+            t_options['save_path'] = download_location
 
             try:
                 torrent_id = self.deClient.call(
@@ -376,7 +376,7 @@ class DeDownloadClient(DownloadClientBase):
             return []
         torList = self.deClient.call(
             'core.get_torrents_status', {"state": "Seeding"}, [
-                'name', 'hash', 'download_location', 'total_size',
+                'name', 'hash', 'save_path', 'total_size',
                 'tracker_host', 'time_added', 'state'
             ])
         activeList = []
