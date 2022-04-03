@@ -2,6 +2,11 @@
 * A Web app to Cross-Seed torrents in Deluge/qBittorrent/Transmission
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
+## Last update
+* 2022.3.29: deluge client, download_location => save_path
+* 2022.3.6: mount db dir (/code/seedcross/db) externally
+
+
 ![screenshot](screenshot/seedcross1.png)
 
 ## Require
@@ -76,8 +81,8 @@ services:
 
 ## Plans
 * Scheduler to run the task periodically
-* Seperate tracker to search different media
-* Hardlink tweaks of file/folder to get more crossed.
+* Seperate tracker to search different media  (done with release, waiting for feedback)
+* Hardlink tweaks of file/folder to get more crossed. (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
 
 
