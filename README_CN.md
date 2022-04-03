@@ -11,18 +11,24 @@
 * Docker：可以是任何支持Docker的环境，比如 nas，seedbox, 你的笔记本也行，它运行起来没什么负担
 
 ## 安装
-* 在装有Docker的环境中，运行以下命令即可：
-```sh
-docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
-```
 * 所需要的就是映射 `8019` 端口出来，以便浏览器访问。
-* 如果你需要 `docker-compose.yml`，这里是个例子：
+
+
+* 在装有Docker的环境中，运行以下命令, 替换 `/somedir/in/host` :
+```sh
+docker run -d --name seedcross -v /somedir/in/host:/code/seedcross/db -p 8019:8019 ccf2012/seedcross:latest
+```
+
+
+或者使用 docker-compose.yml, 同样替换 `/somedir/in/host` 
 ```yml
 version: "3"
 services:
   seedcross:
     container_name: seedcross
     image: ccf2012/seedcross
+    volumes:
+      - /somedir/in/host:/code/seedcross/db
     ports:
       - 8019:8019
     restart: unless-stopped
@@ -96,8 +102,8 @@ cp -R /backup/db  /code/seedcross/
 
 ## 近期计划
 * Scheduler: 实现定期运行，就像iyuu那样
-* Seperate tracker to search different media: 对音乐站不停地搜索Episode，和对影视站不停地搜索FLAC，后面看看能作到什么样
-* Hardlink tweaks of file/folder to get more crossed：那些诱人的 `FraMeSToR.mkv` 和 `FraMeSToR/` ，以及 `CultFilms™` 和 `CultFilms`....
+* Seperate tracker to search different media: 对音乐站不停地搜索Episode，和对影视站不停地搜索FLAC，后面看看能作到什么样 (done with release, waiting for feedback)
+* Hardlink tweaks of file/folder to get more crossed：那些诱人的 `FraMeSToR.mkv` 和 `FraMeSToR/` ，以及 `CultFilms™` 和 `CultFilms`.... (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
 
 
