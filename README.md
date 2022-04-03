@@ -10,16 +10,22 @@
 * Docker
   
 ## Installation
+install with docker run command, replace `/somedir/in/host` with some dir in your host:
 ```sh
-docker run -d --name seedcross -p 8019:8019 ccf2012/seedcross:latest
+docker run -d --name seedcross -v /somedir/in/host:/code/seedcross/db -p 8019:8019 ccf2012/seedcross:latest
 ```
-* if you need a `docker-compose.yml`, here's an example:
+
+
+or with a docker-compose.yml, replace `/somedir/in/host` with some dir in your host
+
 ```yml
 version: "3"
 services:
   seedcross:
     container_name: seedcross
     image: ccf2012/seedcross
+    volumes:
+      - /somedir/in/host:/code/seedcross/db
     ports:
       - 8019:8019
     restart: unless-stopped
