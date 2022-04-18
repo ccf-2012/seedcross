@@ -1,7 +1,6 @@
 import base64
 from datetime import datetime
 import glob, os
-from attr import has
 import qbittorrentapi
 import transmission_rpc
 import deluge_client
