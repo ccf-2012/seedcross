@@ -47,6 +47,12 @@ def settingsView(request):
             config.indexer_other = form.cleaned_data['indexer_other']
             config.fc_count = form.cleaned_data['fc_count']
             config.fc_interval = form.cleaned_data['fc_interval']
+            config.cyclic_reload = form.cleaned_data['cyclic_reload']
+            config.reload_interval_min = form.cleaned_data['reload_interval_min']
+            # TODO: shoud this be configurable
+            config.max_size_difference = 10
+            # config.max_size_difference = form.cleaned_data['max_size_difference']
+
             client.clienttype = form.cleaned_data['client_type']
             client.host = form.cleaned_data['client_host']
             client.port = form.cleaned_data['client_port']
@@ -54,6 +60,7 @@ def settingsView(request):
             client.password = form.cleaned_data['client_password']
             config.save()
             client.save()
+            startCrossSeedRoutine()
             return redirect('cs_list')
         else:
             messages.error(request, "Check error messages")
@@ -80,6 +87,10 @@ def settingsView(request):
             "indexer_other": config.indexer_other,
             "fc_count": config.fc_count,
             "fc_interval": config.fc_interval,
+            "cyclic_reload": config.cyclic_reload,
+            "reload_interval_min": config.reload_interval_min,
+            # TODO: shoud this be configurable
+            # "max_size_difference": config.max_size_difference,
         })
     return render(request, 'crseed/settings.html', {
         'form': form,
@@ -282,3 +293,24 @@ def ajaxRefreshProcessLog(request):
 #     return render(request, 'crseed/logdiv.html', {
 #         'log_data': log,
 #     })
+
+
+def startCrossSeedRoutine():
+    print('Clear old tasks and start...')
+    killAllBackgroupTasks()
+
+    if not validSettings():
+        print('config not ready...')
+        return 
+
+    loadtask = getConfig()
+    if loadtask.cyclic_reload:
+        if loadtask.reload_interval_min > 1:
+            StartTask()
+            vname = "proceed_cross_seed"
+            interval = loadtask.reload_interval_min*60
+            backgroundCrossSeedTask(repeat=interval, verbose_name=vname)
+        else:
+            print('interval should > 1')
+
+    return
