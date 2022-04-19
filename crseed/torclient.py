@@ -6,6 +6,7 @@ import transmission_rpc
 import deluge_client
 import logging
 import pytz
+import time
 import urllib.parse
 from abc import abstractmethod, ABCMeta
 
@@ -180,11 +181,12 @@ class QbDownloadClient(DownloadClientBase):
         return abbrev
 
     def mkSeedTor(self, tor):
+        trackerstr = tor.tracker if len(tor.tracker)>1 else tor.trackers[3]["url"]
         st = SeedingTorrent(
             torrent_hash=tor.hash,
             name=tor.name,
             size=tor.size,
-            tracker=self.abbrevTracker(tor.tracker),
+            tracker=self.abbrevTracker(trackerstr),
             added_date=datetime.utcfromtimestamp(
                 tor.added_on).replace(tzinfo=pytz.utc),
             status=tor.state,
@@ -206,12 +208,23 @@ class QbDownloadClient(DownloadClientBase):
         return activeList
 
     def findJustAdded(self):
-        torList = self.qbClient.torrents_info(status_filter='paused',
-                                              sort='added_on')
-        if torList:
-            return torList[-1]
-        else:
-            return None
+        # newclient = qbittorrentapi.Client(
+        #     host=self.scsetting.host,
+        #     port=self.scsetting.port,
+        #     username=self.scsetting.username,
+        #     password=self.scsetting.password,
+        #     #   VERIFY_WEBUI_CERTIFICATE = False,
+        # )        
+        # breakpoint()
+        time.sleep(5)
+        torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
+        # torList = self.qbClient.torrents_info(sort='added_on')
+        
+        return torList[-1] if torList else None
+        # if torList:
+        #     return torList[-1]
+        # else:
+        #     return None
 
     def addTorrentUrl(self, tor_url, download_location):
         if not self.qbClient:
@@ -219,14 +232,19 @@ class QbDownloadClient(DownloadClientBase):
         st = None
         if self.qbClient:
             try:
+                curr_added_on = time.time()
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
                     is_paused=True,
                     save_path=download_location,
+                    tags='cross_seed',
                     download_path=download_location )
+                # breakpoint()
                 if 'OK' in result.upper():
                     qbTor = self.findJustAdded()
-                    if qbTor:
+                    # breakpoint()
+                    if qbTor and (curr_added_on < qbTor.added_on + 5):
+                    # if qbTor:
                         st = self.mkSeedTor(qbTor)
             except Exception as e:
                 self.log('Torrent not added! Torrent already in session.')
