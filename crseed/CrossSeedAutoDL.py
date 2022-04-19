@@ -24,7 +24,7 @@ class Searcher:
     # 1 MibiByte == 1024^2 bytes
     MiB = 1024**2
     # max size difference (in bytes) in order to account for extra or missing files, eg. nfo files
-    size_differences_strictness = {True: 0, False: 5 * MiB}
+    size_differences_strictness = {True: 0, False: 2 * MiB}
     # max_size_difference = size_differences_strictness[ARGS.strict_size]
     max_size_difference = size_differences_strictness[False]
 
@@ -34,6 +34,8 @@ class Searcher:
     def __init__(self, process_param):
         self.search_results = []
         self.process_param = process_param
+        # TODO: shoud this be configurable
+        # self.max_size_difference = process_param.max_size_difference
 
     def search(self, local_release_data, log, guess_cat=''):
         if local_release_data['size'] is None:
@@ -282,7 +284,7 @@ class Searcher:
             # older torrents' sizes in blutopia are are slightly off
             if result.indexer == 'Blutopia':
                 max_size_difference *= 2
-            if result.size < 1500 * self.MiB:
+            if (max_size_difference > 2048) and (result.size < 1500 * self.MiB):
                 max_size_difference = 2048
 
             m = re.match(local_release_data['tracker'], result.indexer, re.I)

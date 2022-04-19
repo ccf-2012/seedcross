@@ -70,7 +70,10 @@ def backgroundCrossSeedTask():
     if checkTaskCanclled():
         log.finish()
         return
-    log.message('Starting at:' + timezone.now().strftime("%m/%d/%Y, %H:%M:%S"))
+    
+    s = 'Starting at:' + timezone.now().strftime("%m/%d/%Y, %H:%M:%S")
+    log.message(s)
+    print(s)
 
     dlclient = getDownloadClient(torclient, log)
     if dlclient:
@@ -95,3 +98,4 @@ def killAllBackgroupTasks():
 def checkTaskExists(task_vname):
     tasks = Task.objects.filter(verbose_name=task_vname)
     return len(tasks) > 0
+

@@ -26,6 +26,9 @@ class ParamSettingForm(forms.Form):
     jackett_trackers = forms.CharField(label='Tracker / Indexer',  required=False)
     fc_count = forms.IntegerField(label='Flow control: Count limit')
     fc_interval = forms.IntegerField(label='Flow control: Interval')
+    cyclic_reload = forms.BooleanField(label='Cycle run',  required=False)
+    reload_interval_min = forms.IntegerField(label='Cycle run interval (minutes)', required=False)
+    max_size_difference = forms.IntegerField(label='Max size difference', required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,6 +73,8 @@ class ParamSettingForm(forms.Form):
             HTML("""
             <p><strong>Search options</strong></p>
             """),
+            # TODO: shoud this be configurable
+            # Field('max_size_difference', placeholder="max size difference (in bytes) for extra or missing files, eg. nfo files"),
             Field('include_cjk'),
             Field('category_indexers', id='check_id'),
             Div(
@@ -87,8 +92,13 @@ class ParamSettingForm(forms.Form):
                        css_class='form-group col-md-6 mb-0'),
                 Column(Field('fc_interval'),
                        css_class='form-group col-md-6 mb-0'),
-                css_class='form-row'))
-
+                css_class='form-row'),
+            HTML("""
+            <p><strong>Cycle run options</strong></p>
+            """),
+            Field('cyclic_reload'),
+            Field('reload_interval_min'),
+        )
         self.helper.add_input(
             Submit('submit', 'Save Settings', css_class='btn-primary'))
         self.helper.form_method = 'POST'

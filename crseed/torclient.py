@@ -156,6 +156,17 @@ class QbDownloadClient(DownloadClientBase):
 
         return self.qbClient
 
+
+    # def abbrevTracker(self, trackerstr):
+    #     hostnameList = urllib.parse.urlparse(trackerstr).netloc.split('.')
+    #     if len(hostnameList) == 2:
+    #         abbrev = hostnameList[0]
+    #     elif len(hostnameList) == 3:
+    #         abbrev = hostnameList[1]
+    #     else:
+    #         abbrev = ''
+    #     return abbrev
+
     def abbrevTracker(self, trackerstr):
         if len(trackerstr) < 2:
             return ''

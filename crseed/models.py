@@ -99,6 +99,10 @@ class ProcessParam(models.Model):
     indexer_other = models.CharField(max_length=255, default='', null=True)
     fc_count = models.IntegerField(default=20)
     fc_interval = models.IntegerField(default=2)
+    cyclic_reload = models.BooleanField(default=False)
+    reload_interval_min = models.IntegerField(default=1440)
+    last_load = models.DateTimeField(auto_now=True)
+    max_size_difference = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'crseed_process_param'
@@ -125,3 +129,5 @@ class TorClientSetting(models.Model):
 
     def __str__(self):
         return self.name
+
+
