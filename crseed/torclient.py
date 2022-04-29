@@ -222,20 +222,25 @@ class QbDownloadClient(DownloadClientBase):
         torTitle = self.cutExt(torTitle)
         return re.sub(r'\.', ' ', torTitle)
 
-    def findJustAdded(self, tor_title):
-        # torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
-        tor_title = self.normalizeTorTitle(tor_title)
-        torList = self.qbClient.torrents_info(sort='added_on')
-
-        found = [x for x in torList if (self.normalizeTorTitle(x.name) == tor_title)]
-
-        return None if not found else found[0]
-
+    def findJustAdded(self, timestamp):
+        time.sleep(1)
+        # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
+        torList = self.qbClient.torrents_info(category=timestamp)
+        if torList:
+            print('Added: '+torList[0].name)
+            torList[0].set_category('')
+            self.qbClient.torrents_remove_categories(timestamp)
+            return torList[0]
+        else:
+            print('Not Added.')
+            self.qbClient.torrents_remove_categories(timestamp)
+            return None
 
     def addTorrentUrl(self, tor_url, download_location, tor_title):
         if not self.qbClient:
             self.connect()
         st = None
+        timestamp = str(int(time.time()))
         if self.qbClient:
             try:
                 curr_added_on = time.time()
@@ -243,15 +248,19 @@ class QbDownloadClient(DownloadClientBase):
                     urls=tor_url,
                     is_paused=True,
                     save_path=download_location,
-                    tags='cross_seed',
+                    use_auto_torrent_management=False,
+                    category=timestamp,
+                    # tags=[timestamp],
                     download_path=download_location )
                 # breakpoint()
                 if 'OK' in result.upper():
-                    qbTor = self.findJustAdded(tor_title)
-                    # breakpoint()
-                    # if qbTor and (curr_added_on < qbTor.added_on + 5):
+                    qbTor = self.findJustAdded(timestamp)
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
+                    else:
+                        self.log('Torrent not added! Maybe exists.')
+                else:
+                    self.log('Torrent not added! something wrong with qb api ...')
             except Exception as e:
                 self.log('Torrent not added! Torrent already in session.')
                 return None
