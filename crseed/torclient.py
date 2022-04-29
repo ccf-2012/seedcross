@@ -7,6 +7,7 @@ import deluge_client
 import logging
 import pytz
 import time
+import re
 import urllib.parse
 from abc import abstractmethod, ABCMeta
 
@@ -97,7 +98,7 @@ class TrDownloadClient(DownloadClientBase):
             activeList.append(st)
         return activeList
 
-    def addTorrentUrl(self, tor_url, download_location):
+    def addTorrentUrl(self, tor_url, download_location, tor_title):
         if not self.trClient:
             self.connect()
         newtor = None
@@ -207,26 +208,31 @@ class QbDownloadClient(DownloadClientBase):
             activeList.append(st)
         return activeList
 
-    def findJustAdded(self):
-        # newclient = qbittorrentapi.Client(
-        #     host=self.scsetting.host,
-        #     port=self.scsetting.port,
-        #     username=self.scsetting.username,
-        #     password=self.scsetting.password,
-        #     #   VERIFY_WEBUI_CERTIFICATE = False,
-        # )        
-        # breakpoint()
-        time.sleep(5)
-        torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
-        # torList = self.qbClient.torrents_info(sort='added_on')
-        
-        return torList[-1] if torList else None
-        # if torList:
-        #     return torList[-1]
-        # else:
-        #     return None
+    def cutExt(self, torName):
+        if not torName:
+            return ''
+        tortup = os.path.splitext(torName)
+        torext = tortup[1].lower()
+        if re.match(r'\.[0-9a-z]{2,8}$', torext, flags=re.I):
+            return tortup[0].strip()
+        else:
+            return torName
 
-    def addTorrentUrl(self, tor_url, download_location):
+    def normalizeTorTitle(self, torTitle):
+        torTitle = self.cutExt(torTitle)
+        return re.sub(r'\.', ' ', torTitle)
+
+    def findJustAdded(self, tor_title):
+        # torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
+        tor_title = self.normalizeTorTitle(tor_title)
+        torList = self.qbClient.torrents_info(sort='added_on')
+
+        found = [x for x in torList if (self.normalizeTorTitle(x.name) == tor_title)]
+
+        return None if not found else found[0]
+
+
+    def addTorrentUrl(self, tor_url, download_location, tor_title):
         if not self.qbClient:
             self.connect()
         st = None
@@ -241,10 +247,10 @@ class QbDownloadClient(DownloadClientBase):
                     download_path=download_location )
                 # breakpoint()
                 if 'OK' in result.upper():
-                    qbTor = self.findJustAdded()
+                    qbTor = self.findJustAdded(tor_title)
                     # breakpoint()
-                    if qbTor and (curr_added_on < qbTor.added_on + 5):
-                    # if qbTor:
+                    # if qbTor and (curr_added_on < qbTor.added_on + 5):
+                    if qbTor:
                         st = self.mkSeedTor(qbTor)
             except Exception as e:
                 self.log('Torrent not added! Torrent already in session.')
@@ -332,7 +338,7 @@ class DeDownloadClient(DownloadClientBase):
                 self.log('Torrent was not added! maybe exists.')
                 return None
 
-    def addTorrentUrl(self, tor_url, download_location):
+    def addTorrentUrl(self, tor_url, download_location, tor_title):
         if not self.deClient:
             self.connect()
         torhash = None
