@@ -3,6 +3,13 @@
 * 对下载器(Deluge/qBittorrent/Transmission)中的种子，通过Jackett/Prowlarr在各外站上寻找匹配的种子，以暂停状态加入到下载器，供进一步检查完成辅种
 * 参考 [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
+
+## Last update
+* 2022.4.29: dev merge to main
+* 2022.3.29: deluge client, download_location => save_path
+* 2022.3.6: mount db dir (/code/seedcross/db) externally
+
+
 ![screenshot](screenshot/seedcross1.png)
 
 ## 前置条件
@@ -104,8 +111,8 @@ cp -R /backup/db  /code/seedcross/
 
 本辅种方案的流程是这样：
 1. 从下载器中取得种子列表，从种子标题中提取影片名称，使用Jackett/Prowlarr到各站搜索相同影片名字的种子，（直接使用文件名是无法搜到的，需剥离其它额外字串，仅搜影片名字)，在Jackett/Prowlarr返回的信息中通过比对大小进行匹配。
-2. 大小匹配的种子链接，发给下载器，由下载器通过Jackett/Prowlarr下载
-3. 种子真正的标题及文件名，要在种子下载下来后才能得知，因而当得知文件名时种子已经在下载器上了，当前处理流程是保留这些种子，只在界面上标注是否匹配，由用户查看是否还有救。
+2. 在返回的信息中，寻找**大小匹配**的种子链接，发给下载器，由下载器通过Jackett/Prowlarr下载
+3. 种子真正的标题及文件名，要在种子下载下来后才能得知，因而若要比较种子文件是否匹配时，种子已经在下载器上了，当前处理流程是保留这些种子，只在界面上标注是否匹配，由用户查看是否还有救。
 4. 未来可能可以作的改善可以是 (not scheduled)：
    1. 仍然保持下载器下载的方案，在下载完后将不匹配的种子删除
    2. 先由seedcross下载种子文件，处理判断后将种子文件提交下载器
