@@ -3,6 +3,7 @@
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
 ## Last update
+* 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
 * 2022.3.6: mount db dir (/code/seedcross/db) externally
 
@@ -74,14 +75,14 @@ services:
   * user click the Canel button.
   * the progress panel will disappear when page refreshed.
 
- 
+
 ## Search History
 * Torrents that has been searched will be recorded, they won't bother the trackers for the next process.
 * but when you add new trackers you may want to redo the search, click the `Clear Search History` will delete all the records.
 
 ## Plans
-* Scheduler to run the task periodically
-* Seperate tracker to search different media  (done with release, waiting for feedback)
+* Scheduler to run the task periodically (A Simple cyclic run is implemented, expect feedback)
+* Seperate tracker to search different media  (done with release, expect feedback)
 * Hardlink tweaks of file/folder to get more crossed. (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
 
