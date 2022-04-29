@@ -403,11 +403,11 @@ def downloadResult(dlclient, result, localTor, log):
         logger.info(s)
         log.message(s)
         return None
-    s = 'Grabbing release: ' + localTor.name
+    s = 'Grabbing release: ' + result.title
     logger.info(s)
     log.message(s)
     # Jackett return dlclient.addTorrentUrl(result['Link'], localTor.save_path)
-    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path)
+    return dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, result.title)
 
 
 def checkTaskCanclled():
@@ -469,10 +469,10 @@ def iterTorrents(dlclient, process_param, log):
                 return
             st = downloadResult(dlclient, result, localTor, log)
             if st:
-                print(f'- Success added: {localTor.name}')
-                logger.info(f'- Success added: {localTor.name}')
+                print(f'- Success added: {result.title}')
+                logger.info(f'- Success added: {result.title}')
                 log.inc(download_count=1)
-                log.message('Added: ' + localTor.name)
+                log.message('Added: ' + result.title)
                 saveCrossedTorrent(st, dbSearchTor)
             # else:
             #     log.message('Maybe existed: ' + localTor.name)
