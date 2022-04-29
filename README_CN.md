@@ -100,8 +100,19 @@ docker exec -it seedcross /bin/bash
 cp -R /backup/db  /code/seedcross/
 ```
 
+## 关于匹配的说明
+
+本辅种方案的流程是这样：
+1. 从下载器中取得种子列表，从种子标题中提取影片名称，使用Jackett/Prowlarr到各站搜索相同影片名字的种子，（直接使用文件名是无法搜到的，需剥离其它额外字串，仅搜影片名字)，在Jackett/Prowlarr返回的信息中通过比对大小进行匹配。
+2. 大小匹配的种子链接，发给下载器，由下载器通过Jackett/Prowlarr下载
+3. 种子真正的标题及文件名，要在种子下载下来后才能得知，因而当得知文件名时种子已经在下载器上了，当前处理流程是保留这些种子，只在界面上标注是否匹配，由用户查看是否还有救。
+4. 未来可能可以作的改善可以是 (not scheduled)：
+   1. 仍然保持下载器下载的方案，在下载完后将不匹配的种子删除
+   2. 先由seedcross下载种子文件，处理判断后将种子文件提交下载器
+
+
 ## 近期计划
-* Scheduler: 实现定期运行，就像iyuu那样
+* Scheduler: 实现定期运行，就像iyuu那样 (采用了一种定期运行的方式，期待反馈)
 * Seperate tracker to search different media: 对音乐站不停地搜索Episode，和对影视站不停地搜索FLAC，后面看看能作到什么样 (done with release, waiting for feedback)
 * Hardlink tweaks of file/folder to get more crossed：那些诱人的 `FraMeSToR.mkv` 和 `FraMeSToR/` ，以及 `CultFilms™` 和 `CultFilms`.... (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
