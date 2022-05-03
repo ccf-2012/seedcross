@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from .tasks import backgroundCrossSeedTask
 from .tasks import checkTaskExists, killAllBackgroupTasks
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,7 @@ from .models import ProcessParam, TorClientSetting, CrossTorrent, SearchedHistor
 from ajax_datatable.views import AjaxDatatableView
 from django.core import serializers
 from django.contrib import messages
-import json
+import os
 
 
 def getConfig():
@@ -202,7 +202,26 @@ class CrossedTorrentTable(AjaxDatatableView):
             'title': 'Location',
             'searchable': False,
         },
+        {
+            'name': 'fixbtn',
+            'title': 'Fix',
+            'className': 'dt-center',
+            'placeholder': True,
+            'searchable': False,
+            'orderable': False,
+        },
     ]
+
+    def customize_row(self, row, obj):
+        if obj.name != obj.crossed_with.name:
+            row['fixbtn'] = """
+                        <a href="#" class="btn btn-outline-primary btn-sm"
+                        onclick="var id=this.closest('tr').id.substr(4); window.location.href='/crseed/fix_path/'+ id; return false;">
+                        Fix
+                        </a>
+            """
+        else:
+            row['fixbtn'] = ''
 
 
 @login_required
@@ -314,3 +333,62 @@ def startCrossSeedRoutine():
             print('interval should > 1')
 
     return
+
+
+def symbolLink(fromLoc, toLoc):
+    if os.path.islink(fromLoc):
+        print('\033[31mSKIP symbolic link: [%s]\033[0m ' % fromLoc)
+        return
+    if not os.path.exists(fromLoc):
+        print('\033[31mSource not exist: [%s]\033[0m ' % fromLoc)
+        return
+
+    if not os.path.exists(toLoc):
+        print('ln -s', fromLoc, toLoc)
+        os.symlink(fromLoc, toLoc)
+    else:
+        print('\033[32mTarget Exists: [%s]\033[0m ' % toLoc)
+
+
+def isMediaFile(torName):
+    filename, file_ext = os.path.splitext(torName)
+    return file_ext.lower() in ['.mkv', '.mp4', '.iso']
+
+
+def ensureDir(file_path):
+    if os.path.isfile(file_path):
+        file_path = os.path.dirname(file_path)
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
+
+
+@login_required
+def ajaxFixSeedPath(request, pk):
+    tor = get_object_or_404(CrossTorrent, pk=pk)
+    fixSeedPath(tor)
+    tor.fixed = True
+    tor.save()
+    return JsonResponse({'Fixed': True})
+
+
+def fixSeedPath(tor):
+    if tor.name == tor.crossed_with.name:
+        return
+    # src: xxx.mkv  dest: xxyx.mkv
+    if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
+        symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
+        return
+    # src: xxx/
+    if os.path.isdir(tor.crossed_with.name):
+        # dest: xxxx.mkv
+        if isMediaFile(tor.name):
+            symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name, tor.name), os.path.join(tor.location, tor.name))
+        # dest: xxyx/
+        else:
+            symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
+        return
+    # src: xxx.mkv  dest: xxx/
+    ensureDir(os.path.join(tor.location, tor.name))
+    symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name, tor.crossed_with.name))
+    return 
+

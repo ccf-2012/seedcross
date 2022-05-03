@@ -81,8 +81,8 @@ services:
 * but when you add new trackers you may want to redo the search, click the `Clear Search History` will delete all the records.
 
 ## Plans
-* Scheduler to run the task periodically (A Simple cyclic run is implemented, expect feedback)
-* Seperate tracker to search different media  (done with release, expect feedback)
+* Scheduler to run the task periodically (A simple cyclic run is implemented, expect feedback)
+* Seperate tracker to search different media  (done, expect feedback)
 * Hardlink tweaks of file/folder to get more crossed. (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
 

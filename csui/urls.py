@@ -38,6 +38,7 @@ urlpatterns += [
     path('crseed/clearhistory', crview.clearHistory, name='cs_clear_history'),
     path('crseed/clearcrossed', crview.clearCrossed, name='cs_clearcrossed'),
     path('crseed/cancel_tasks', crview.cancelTasks, name='cs_cancel_tasks'),
+    path('crseed/fix_path/<int:id>', crview.ajaxFixSeedPath, name='cs_fix_path'),
 ]
 
 

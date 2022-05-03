@@ -74,6 +74,9 @@ $(document).ready(function () {
             // $(row).addClass('reen') 
             $('td', row).css('background-color', 'LightGreen');
         }
+        if (data.fixed){
+            $('td', row).css('background-color', 'LightBlue');
+        }
         // $(row).addClass(data.read ? 'read' : 'unread');
     })
     var count = 0;

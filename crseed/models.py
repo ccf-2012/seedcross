@@ -50,6 +50,7 @@ class CrossTorrent(models.Model):
         on_delete=models.SET_NULL,
     )
     added_date = models.DateTimeField(auto_now_add=True)
+    fixed = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'crseed_cross_torrent'
@@ -103,6 +104,9 @@ class ProcessParam(models.Model):
     reload_interval_min = models.IntegerField(default=1440)
     last_load = models.DateTimeField(auto_now=True)
     max_size_difference = models.IntegerField(default=0)
+    map_dir = models.BooleanField(default=False)
+    fix_docker_dir = models.CharField(max_length=128, default='', null=True)
+    fix_real_dir = models.CharField(max_length=128, default='', null=True)
 
     class Meta:
         db_table = 'crseed_process_param'
