@@ -69,13 +69,13 @@ $(document).ready(function () {
 
     var table = $("#datatable").closest('table.dataTable');
     $('#datatable').on('rowCallback', function(event, table, row, data ) {
-        // console.log(data);
-        if (data.name == data.crossed_with){
+        console.log(data);
+        if (data.fixed == 'Yes'){
+            $('td', row).css('background-color', 'lightblue');
+        }
+        else if (data.name == data.crossed_with){
             // $(row).addClass('reen') 
             $('td', row).css('background-color', 'LightGreen');
-        }
-        if (data.fixed){
-            $('td', row).css('background-color', 'LightBlue');
         }
         // $(row).addClass(data.read ? 'read' : 'unread');
     })
@@ -118,6 +118,7 @@ $(document).ready(function () {
         });
     });
     });
+
 
     // $(function () {
     // $('#clearRecBtn').on('click', function () {
