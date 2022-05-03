@@ -395,31 +395,37 @@ def ajaxDeleteHistory(request, id):
 def ajaxFixSeedPath(request, id):
     tor = get_object_or_404(CrossTorrent, pk=id)
     if not tor.fixed:
-        fixSeedPath(tor)
+        ret = fixSeedPath(tor)
         tor.fixed = True
         tor.save()
     # return redirect('cs_list')
-    return JsonResponse({'Fixed': True})
+    return JsonResponse({'Fixed': ret})
 
 
 def fixSeedPath(tor):
     if tor.name == tor.crossed_with.name:
-        return
+        return False
     # src: xxx.mkv  dest: xxyx.mkv
     if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
         symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
-        return
+        return True
     # src: xxx/
-    if os.path.isdir(tor.crossed_with.name):
+    srcdir = os.path.join(tor.crossed_with.location, tor.crossed_with.name)
+    if os.path.isdir(srcdir):
         # dest: xxxx.mkv
         if isMediaFile(tor.name):
-            symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name, tor.name), os.path.join(tor.location, tor.name))
+            srcfile = os.path.join(srcdir, tor.name)
+            if os.path.isfile(srcfile):
+                symbolLink(srcfile, os.path.join(tor.location, tor.name))
+                return True
+            else:
+                return False
         # dest: xxyx/
         else:
             symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
-        return
+            return True
     # src: xxx.mkv  dest: xxx/
     ensureDir(os.path.join(tor.location, tor.name))
     symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name, tor.crossed_with.name))
-    return 
+    return True
 
