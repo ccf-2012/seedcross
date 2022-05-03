@@ -210,13 +210,19 @@ class CrossedTorrentTable(AjaxDatatableView):
             'searchable': False,
             'orderable': False,
         },
+        {
+            'name': 'fixed',
+            'visible': True,
+            'title': 'fixed',
+            'searchable': False,
+        },
     ]
 
     def customize_row(self, row, obj):
         if obj.name != obj.crossed_with.name:
             row['fixbtn'] = """
                         <a href="#" class="btn btn-outline-primary btn-sm"
-                        onclick="var id=this.closest('tr').id.substr(4); window.location.href='/crseed/fix_path/'+ id; return false;">
+                        onclick="var id=this.closest('tr').id.substr(4); $.ajax({url: '/crseed/fix_path/'+ id}); $('#datatable').DataTable().ajax.reload(null, false); return false;">
                         Fix
                         </a>
             """
@@ -368,8 +374,8 @@ def ajaxFixSeedPath(request, id):
     fixSeedPath(tor)
     tor.fixed = True
     tor.save()
-    return redirect('cs_list')
-    # return JsonResponse({'Fixed': True})
+    # return redirect('cs_list')
+    return JsonResponse({'Fixed': True})
 
 
 def fixSeedPath(tor):
