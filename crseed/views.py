@@ -9,6 +9,7 @@ from ajax_datatable.views import AjaxDatatableView
 from django.core import serializers
 from django.contrib import messages
 import os
+import glob
 
 
 def getConfig():
@@ -396,10 +397,27 @@ def ajaxFixSeedPath(request, id):
     tor = get_object_or_404(CrossTorrent, pk=id)
     if not tor.fixed:
         ret = fixSeedPath(tor)
-        tor.fixed = True
-        tor.save()
+        if ret:
+            tor.fixed = True
+            tor.save()
     # return redirect('cs_list')
     return JsonResponse({'Fixed': ret})
+
+
+def getFirstMediaFile(filePath):
+    mediaFiles = getMediaFiles(filePath)
+    return mediaFiles[0] if mediaFiles else None
+    
+
+def getMediaFiles(filePath):
+    types = ('*.mkv', '*.mp4', '*.ts')
+    filesFound = []
+    curdir = os.getcwd()
+    os.chdir(filePath)
+    for files in types:
+        filesFound.extend(glob.glob(files))
+    os.chdir(curdir)
+    return filesFound
 
 
 def fixSeedPath(tor):
@@ -419,7 +437,9 @@ def fixSeedPath(tor):
                 symbolLink(srcfile, os.path.join(tor.location, tor.name))
                 return True
             else:
-                return False
+                srcfile = getFirstMediaFile(srcdir)
+                symbolLink(srcfile, os.path.join(tor.location, tor.name))
+                return True
         # dest: xxyx/
         else:
             symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
