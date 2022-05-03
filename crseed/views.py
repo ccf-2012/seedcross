@@ -437,7 +437,7 @@ def fixSeedPath(tor):
                 symbolLink(srcfile, os.path.join(tor.location, tor.name))
                 return True
             else:
-                srcfile = getFirstMediaFile(srcdir)
+                srcfile = os.path.join(srcdir, getFirstMediaFile(srcdir))
                 symbolLink(srcfile, os.path.join(tor.location, tor.name))
                 return True
         # dest: xxyx/
