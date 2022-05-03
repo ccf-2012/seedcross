@@ -212,7 +212,7 @@ class CrossedTorrentTable(AjaxDatatableView):
         },
         {
             'name': 'fixed',
-            'visible': True,
+            'visible': False,
             'title': 'fixed',
             'searchable': False,
         },
@@ -371,9 +371,10 @@ def ensureDir(file_path):
 @login_required
 def ajaxFixSeedPath(request, id):
     tor = get_object_or_404(CrossTorrent, pk=id)
-    fixSeedPath(tor)
-    tor.fixed = True
-    tor.save()
+    if not tor.fixed:
+        fixSeedPath(tor)
+        tor.fixed = True
+        tor.save()
     # return redirect('cs_list')
     return JsonResponse({'Fixed': True})
 
