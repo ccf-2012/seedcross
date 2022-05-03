@@ -275,7 +275,24 @@ class SearchHistoryTable(AjaxDatatableView):
             'visible': True,
             'searchable': False,
         },
+        {
+            'name': 'delbtn',
+            'title': 'Delete',
+            'className': 'dt-center',
+            'placeholder': True,
+            'searchable': False,
+            'orderable': False,
+        },
     ]
+
+
+    def customize_row(self, row, obj):
+        row['delbtn'] = """
+                    <a href="#" class="btn btn-outline-primary btn-sm"
+                    onclick="var id=this.closest('tr').id.substr(4); $.ajax({url: '/crseed/delete_history/'+ id}); $('#datatable').DataTable().ajax.reload(); return true;">
+                    Delete
+                    </a>
+        """
 
 
 @login_required
@@ -367,6 +384,12 @@ def ensureDir(file_path):
     if not os.path.exists(file_path):
         os.makedirs(file_path)
 
+@login_required
+def ajaxDeleteHistory(request, id):
+    tor = get_object_or_404(SearchedHistory, pk=id)
+    tor.delete()
+    return JsonResponse({'Deleted': True})
+    
 
 @login_required
 def ajaxFixSeedPath(request, id):
