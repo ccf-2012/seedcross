@@ -363,12 +363,13 @@ def ensureDir(file_path):
 
 
 @login_required
-def ajaxFixSeedPath(request, pk):
-    tor = get_object_or_404(CrossTorrent, pk=pk)
+def ajaxFixSeedPath(request, id):
+    tor = get_object_or_404(CrossTorrent, pk=id)
     fixSeedPath(tor)
     tor.fixed = True
     tor.save()
-    return JsonResponse({'Fixed': True})
+    return redirect('cs_list')
+    # return JsonResponse({'Fixed': True})
 
 
 def fixSeedPath(tor):
