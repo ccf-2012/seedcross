@@ -50,6 +50,8 @@ def settingsView(request):
             config.fc_interval = form.cleaned_data['fc_interval']
             config.cyclic_reload = form.cleaned_data['cyclic_reload']
             config.reload_interval_min = form.cleaned_data['reload_interval_min']
+            config.map_from_path = form.cleaned_data['map_from_path']
+            config.map_to_path = form.cleaned_data['map_to_path']
             # TODO: shoud this be configurable
             config.max_size_difference = 10
             # config.max_size_difference = form.cleaned_data['max_size_difference']
@@ -90,6 +92,8 @@ def settingsView(request):
             "fc_interval": config.fc_interval,
             "cyclic_reload": config.cyclic_reload,
             "reload_interval_min": config.reload_interval_min,
+            "map_from_path": config.map_from_path,
+            "map_to_path": config.map_to_path,
             # TODO: shoud this be configurable
             # "max_size_difference": config.max_size_difference,
         })
@@ -385,6 +389,7 @@ def ensureDir(file_path):
     if not os.path.exists(file_path):
         os.makedirs(file_path)
 
+
 @login_required
 def ajaxDeleteHistory(request, id):
     tor = get_object_or_404(SearchedHistory, pk=id)
@@ -420,32 +425,47 @@ def getMediaFiles(filePath):
     return filesFound
 
 
+def mapDockerPathToReal(inputPath):
+    cfg = getConfig()
+    if not cfg.map_from_path.strip():
+        return inputPath
+    mapDockerPath = cfg.map_from_path
+    mapRealPath = cfg.map_to_path
+    if mapDockerPath and inputPath.startswith(mapDockerPath):
+        return inputPath.replace(mapDockerPath,
+                            mapRealPath, 1)
+    else:
+        return inputPath
+
 def fixSeedPath(tor):
     if tor.name == tor.crossed_with.name:
         return False
+
+    srcitem = mapDockerPathToReal(os.path.join(tor.crossed_with.location, tor.crossed_with.name))
+    destitem = mapDockerPathToReal(os.path.join(tor.location, tor.name))
     # src: xxx.mkv  dest: xxyx.mkv
     if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
-        symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
+        symbolLink(srcitem, destitem)
         return True
     # src: xxx/
-    srcdir = os.path.join(tor.crossed_with.location, tor.crossed_with.name)
-    if os.path.isdir(srcdir):
+    if os.path.isdir(srcitem):
         # dest: xxxx.mkv
         if isMediaFile(tor.name):
-            srcfile = os.path.join(srcdir, tor.name)
+            srcfile = os.path.join(srcitem, tor.name)
             if os.path.isfile(srcfile):
-                symbolLink(srcfile, os.path.join(tor.location, tor.name))
+                symbolLink(srcfile, destitem)
                 return True
             else:
-                srcfile = os.path.join(srcdir, getFirstMediaFile(srcdir))
-                symbolLink(srcfile, os.path.join(tor.location, tor.name))
+                srcfile = os.path.join(srcitem, getFirstMediaFile(srcitem))
+                symbolLink(srcfile, destitem)
                 return True
         # dest: xxyx/
         else:
-            symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name))
+            symbolLink(srcitem, destitem)
             return True
     # src: xxx.mkv  dest: xxx/
-    ensureDir(os.path.join(tor.location, tor.name))
-    symbolLink(os.path.join(tor.crossed_with.location, tor.crossed_with.name), os.path.join(tor.location, tor.name, tor.crossed_with.name))
-    return True
-
+    if isMediaFile(srcitem):
+        ensureDir(destitem)
+        symbolLink(srcitem, os.path.join(destitem, tor.crossed_with.name))
+        return True
+    return False
