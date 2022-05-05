@@ -146,14 +146,8 @@ chmod +x start.sh
    2. 先由seedcross下载种子文件，处理判断后将种子文件提交下载器
 
 
-## 近期计划
-* Scheduler: 实现定期运行，就像iyuu那样 (采用了一种定期运行的方式，期待反馈)
-* Seperate tracker to search different media: 对音乐站不停地搜索Episode，和对影视站不停地搜索FLAC，后面看看能作到什么样 (done with release, waiting for feedback)
-* Hardlink tweaks of file/folder to get more crossed：那些诱人的 `FraMeSToR.mkv` 和 `FraMeSToR/` ，以及 `CultFilms™` 和 `CultFilms`.... (check [tortweak](https://github.com/ccf-2012/tortweak))
-* Open to you Dai-lo's suggestions.
-
-
 ## 关于Fix的说明
+### Fix的功能
 * 辅种时会碰到以下情形：
 1. 同样是文件或目录，但名字稍有不同的，如：
 ```
@@ -176,6 +170,13 @@ Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD.mkv
 * 对于多个相同的条目，只有点击的那个会标蓝
 * 对于已经是标蓝的条目，再次点击 `Fix` 将清掉标蓝，然后再次点击将再次执行
 * 被Fixed的种子，可在下载器中去作强制校验尝试辅种
+
+### 目录映射
+* 如果下载器是以docker安装，或者seedcross是以dockeer安装，则进行这样的软链Fix操作，需要对操作目录作映射
+* 作软链操作的是seedcross，所以最终映射应以seedcross所理解的目录为目标
+1. 若seedcross和下载器都没有在docker中，则不应用映射，`Map From:` 为空则不作映射
+2. 若seedcross源码安装，而下载器在docker中，其下载目录比如在 `/downloads`，对应host的 `/volume1/downloads`，则应在seedcross中设置`Map from:` 为 `/downloads` 而`Map to`设为 `/volume1/downloads`
+3. 若seedcross在docker中，则应映射一个位置给此docker用于操作，比如 `/torrents` 指向下载器的下载路径，若下载器也在docker，配置同2，则应在seedcross中设置`Map from:` 为 `/downloads` 而`Map to`设为 `/torrents`
 
 
 ## Acknowledgement
