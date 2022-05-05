@@ -69,7 +69,7 @@ $(document).ready(function () {
 
     var table = $("#datatable").closest('table.dataTable');
     $('#datatable').on('rowCallback', function(event, table, row, data ) {
-        console.log(data);
+        // console.log(data);
         if (data.fixed == 'Yes'){
             $('td', row).css('background-color', 'lightblue');
         }
