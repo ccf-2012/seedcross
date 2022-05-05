@@ -5,6 +5,7 @@
 
 
 ## Last update
+* 2022.5.5:  `Fix` path of crossed torrent to match local path, required your download client is running on the same machine as seedcross. you may set a path map for dockers.
 * 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
 * 2022.3.6: mount db dir (/code/seedcross/db) externally

@@ -366,16 +366,18 @@ def startCrossSeedRoutine():
 def symbolLink(fromLoc, toLoc):
     if os.path.islink(fromLoc):
         print('\033[31mSKIP symbolic link: [%s]\033[0m ' % fromLoc)
-        return
+        return False
     if not os.path.exists(fromLoc):
         print('\033[31mSource not exist: [%s]\033[0m ' % fromLoc)
-        return
+        return False
 
     if not os.path.exists(toLoc):
         print('ln -s', fromLoc, toLoc)
         os.symlink(fromLoc, toLoc)
+        return True
     else:
         print('\033[32mTarget Exists: [%s]\033[0m ' % toLoc)
+        return False
 
 
 def isMediaFile(torName):
@@ -400,11 +402,18 @@ def ajaxDeleteHistory(request, id):
 @login_required
 def ajaxFixSeedPath(request, id):
     tor = get_object_or_404(CrossTorrent, pk=id)
+    ret = False
     if not tor.fixed:
         ret = fixSeedPath(tor)
+        print('Fixed: ' + str(ret))
         if ret:
             tor.fixed = True
             tor.save()
+    else:
+        print('already fixed, mark it unfixed. ')
+        tor.fixed = False
+        tor.save()
+
     # return redirect('cs_list')
     return JsonResponse({'Fixed': ret})
 
@@ -445,27 +454,22 @@ def fixSeedPath(tor):
     destitem = mapDockerPathToReal(os.path.join(tor.location, tor.name))
     # src: xxx.mkv  dest: xxyx.mkv
     if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
-        symbolLink(srcitem, destitem)
-        return True
+        return symbolLink(srcitem, destitem)
     # src: xxx/
     if os.path.isdir(srcitem):
         # dest: xxxx.mkv
         if isMediaFile(tor.name):
             srcfile = os.path.join(srcitem, tor.name)
             if os.path.isfile(srcfile):
-                symbolLink(srcfile, destitem)
-                return True
+                return symbolLink(srcfile, destitem)
             else:
                 srcfile = os.path.join(srcitem, getFirstMediaFile(srcitem))
-                symbolLink(srcfile, destitem)
-                return True
+                return symbolLink(srcfile, destitem)
         # dest: xxyx/
         else:
-            symbolLink(srcitem, destitem)
-            return True
+            return symbolLink(srcitem, destitem)
     # src: xxx.mkv  dest: xxx/
     if isMediaFile(srcitem):
         ensureDir(destitem)
-        symbolLink(srcitem, os.path.join(destitem, tor.crossed_with.name))
-        return True
+        return symbolLink(srcitem, os.path.join(destitem, tor.crossed_with.name))
     return False
