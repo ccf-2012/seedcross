@@ -105,8 +105,8 @@ class ProcessParam(models.Model):
     last_load = models.DateTimeField(auto_now=True)
     max_size_difference = models.IntegerField(default=0)
     map_dir = models.BooleanField(default=False)
-    fix_docker_dir = models.CharField(max_length=128, default='', null=True)
-    fix_real_dir = models.CharField(max_length=128, default='', null=True)
+    map_from_path = models.CharField(max_length=128, default='', null=True)
+    map_to_path = models.CharField(max_length=128, default='', null=True)
 
     class Meta:
         db_table = 'crseed_process_param'

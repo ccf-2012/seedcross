@@ -29,6 +29,8 @@ class ParamSettingForm(forms.Form):
     cyclic_reload = forms.BooleanField(label='Cycle run',  required=False)
     reload_interval_min = forms.IntegerField(label='Cycle run interval (minutes)', required=False)
     max_size_difference = forms.IntegerField(label='Max size difference', required=False)
+    map_from_path = forms.CharField(label='Map From: Download client(QB/Tr/De) path', required=False)
+    map_to_path = forms.CharField(label='Map to: seedcross path', required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -98,6 +100,14 @@ class ParamSettingForm(forms.Form):
             """),
             Field('cyclic_reload'),
             Field('reload_interval_min'),
+            HTML("""
+            <p><strong>Fix options</strong> (required: your download client is running on the same machine as seedcross)</p>
+            """),
+            Row(Column(Field('map_from_path'),
+                       css_class='form-group col-md-6 mb-0'),
+                Column(Field('map_to_path'),
+                       css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'),
         )
         self.helper.add_input(
             Submit('submit', 'Save Settings', css_class='btn-primary'))
