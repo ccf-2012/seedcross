@@ -5,7 +5,7 @@
 
 
 ## Last update
-* 2022.5.5:  `Fix` 功能，可在界面上操作对目录不匹配的种子通过软链(ln -s)作修复，需要下载器和seedcross运行在同一台机器，（或者把目录mount过来）.
+* 2022.5.5:  `Fix` 功能，可在界面上操作对目录不匹配的种子通过软链(ln -s)作修复，需要下载器和seedcross运行在同一台机器，（或者把目录mount过来）. 对于下载器在docker中的 或 seedcross运行在docker中的，可以设置目录的map.
 * 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
 * 2022.3.6: mount db dir (/code/seedcross/db) externally
@@ -128,28 +128,12 @@ chmod +x start.sh
 * 查过的种子会被存在一个History表中，这些种子在下次查询时将会跳过，即使你已经开始在另一个下载器进行辅种查询.
 * 如果你又收了个新站，你可能会想重新进行搜索，点击菜单中的 `Clear Search History` 就会删除所有记录.
 
+
+
 ## 数据库备份与恢复
-* 有些麻烦预警
-1. 先进入docker后台，把db拷出一份到 `/backup`
-```sh
-docker exec -it seedcross /bin/bash
+* docker方式安装时，前述安装时 `/somedir/in/host` 所指向的地方是保存数据库的，备份此目录即可
+* 源码安装的话，数据库位置在 `seedcross/db` 目录
 
-
-mkdir /backup
-cp -R /code/seedcross/db /backup/ 
-```
-2. 停止docker，将`/backup` 映射出来，比如映射到 `/volume1/docker/backup`
-3. 再启动docker，就可以主机中的 `/volume1/docker/backup` 看到 `db` 目录，备份这个目录
-
-* 更新docker后恢复数据 
-1. 重新 pull 了新image后，在建 container时要映射一个目录到主机
-2. 备份的数据拷到这个目录
-3. 然后将备份的目录拷到程序目录中替换
-```
-docker exec -it seedcross /bin/bash
-
-cp -R /backup/db  /code/seedcross/
-```
 
 ## 关于匹配的说明
 
@@ -167,6 +151,31 @@ cp -R /backup/db  /code/seedcross/
 * Seperate tracker to search different media: 对音乐站不停地搜索Episode，和对影视站不停地搜索FLAC，后面看看能作到什么样 (done with release, waiting for feedback)
 * Hardlink tweaks of file/folder to get more crossed：那些诱人的 `FraMeSToR.mkv` 和 `FraMeSToR/` ，以及 `CultFilms™` 和 `CultFilms`.... (check [tortweak](https://github.com/ccf-2012/tortweak))
 * Open to you Dai-lo's suggestions.
+
+
+## 关于Fix的说明
+* 辅种时会碰到以下情形：
+1. 同样是文件或目录，但名字稍有不同的，如：
+```
+Olympus.S01.1080p.GBR.Blu-ray.AVC.DTS-HD.MA.5.1-PzD
+Olympus S01 1080p GBR Blu-ray AVC DTS-HD MA 5.1-PzD
+
+Prometheus.2012.COMPLETE.UHD.BLURAY-TERMiNAL
+Prometheus.2012.2160p.BluRay.HEVC.DTS-HD.MA.7.1-TERMiNAL
+
+JET PILOT
+Jet Pilot 1957 2in1 1080p Blu-ray AVC DTS-HD MA 2.0-MM
+```
+
+2. 一个是文件，另一个是目录，而目录内文件是相同的，如：
+```
+Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD/
+Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD.mkv
+```
+* 对于这样的种子，在界面上点击 `Fix` 会尝试制作目录/软链使之匹配。点击后软链建立了表格条目将标浅蓝
+* 对于多个相同的条目，只有点击的那个会标蓝
+* 对于已经是标蓝的条目，再次点击 `Fix` 将清掉标蓝，然后再次点击将再次执行
+* 被Fixed的种子，可在下载器中去作强制校验尝试辅种
 
 
 ## Acknowledgement
