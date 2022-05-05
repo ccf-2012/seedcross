@@ -42,6 +42,49 @@ services:
     restart: unless-stopped
 ```
 
+## 以源码安装和启动
+* create a virtualenv
+```sh
+# install virtualenv with root
+sudo pip install virtualenv
+
+# create a virutalenv
+virtualenv  seed
+source seed/bin/activate
+```
+
+* clone the source
+```sh
+git clone https://github.com/ccf-2012/seedcross.git
+```
+
+* build the db
+```sh
+cd seedcross
+mkdir db
+python manager.py migrate
+
+# create a admin user
+python manager.py createsuperuser
+```
+
+* (optional) set db to wal mode, to reduce sqlite3's 'table is locked'.
+```sh
+cd db
+sqlite3 db.sqlite3 'PRAGMA journal_mode=wal;'
+cd ..
+```
+
+* run the server
+```sh
+# better with a screen or tmux
+screen 
+# under seedcross folder 
+chmod +x start.sh
+./start.sh
+```
+
+
 ## 开始使用
 1. 浏览器中打开 `http://<your-ip>:8019` 
 2. 用户名:密码  `admin`:`admin`
