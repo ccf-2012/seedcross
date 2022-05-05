@@ -3,7 +3,7 @@
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
 ## Last update
-* 2022.5.5:  `Fix` path of crossed torrent to match local path, required your download client is running on the same machine as seedcross. you may set a path map for dockers.
+* 2022.5.5:  `Fix` 功能，可在界面上操作对目录不匹配的种子通过软链(ln -s)作修复，需要下载器和seedcross运行在同一台机器，（或者把目录mount过来）.
 * 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
 * 2022.3.6: mount db dir (/code/seedcross/db) externally
@@ -16,7 +16,7 @@
 * Deluge/qBittorrent/Transmission
 * Docker
   
-## Installation
+## Installation with docker
 install with docker run command, replace `/somedir/in/host` with some dir in your host:
 ```sh
 docker run -d --name seedcross -v /somedir/in/host:/code/seedcross/db -p 8019:8019 ccf2012/seedcross:latest
@@ -37,6 +37,49 @@ services:
       - 8019:8019
     restart: unless-stopped
 ```
+
+## Install with source
+* create a virtualenv
+```sh
+# install virtualenv with root
+sudo pip install virtualenv
+
+# create a virutalenv
+virtualenv  seed
+source seed/bin/activate
+```
+
+* clone the source
+```sh
+git clone https://github.com/ccf-2012/seedcross.git
+```
+
+* build the db
+```sh
+cd seedcross
+mkdir db
+python manager.py migrate
+
+# create a admin user
+python manager.py createsuperuser
+```
+
+* (optional) set db to wal mode, to reduce sqlite3's 'table is locked'.
+```sh
+cd db
+sqlite3 db.sqlite3 'PRAGMA journal_mode=wal;'
+cd ..
+```
+
+* run the server
+```sh
+# better with a screen or tmux
+screen 
+# under seedcross folder 
+chmod +x start.sh
+./start.sh
+```
+
 
 ## Login
 1. open `http://<your-ip>:8019` in browser
