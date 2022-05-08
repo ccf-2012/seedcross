@@ -120,6 +120,41 @@ chmod +x start.sh
   * the progress panel will disappear when page refreshed.
 
 
+## Notes on the match
+
+This cross seeding tool works as follows.
+
+1. Get the list of torrents from the downloader, extract the movie name from the torrent title, use Jackett/Prowlarr to search for torrents with the same movie name at each site, (you can't search directly using the file name, you need to strip extra strings and search only for the movie name), and match the information returned by Jackett/Prowlarr by comparing the size.
+2. The torrent download link sent to the downloader, which downloads it via Jackett/Prowlarr
+3. The actual title and file name of the torrent are not known until the .torrent file are downloaded, so if we want to compare whether the torrent is exactly match, the seeds are already on the downloader. currently the croos-seed keep the torrents and only mark whether they match on the ui, and let the user check whether it can be rescued.
+
+* so it will download and keep some torrent that's not same.
+
+
+## Notes on the fix
+
+There are sometimes torrents with same content but not in same name, these torrents maybe rescued. In the recent update, I have add a 'Fix' button, to get some of them fixed with symbolink:
+1. both are files, or both folder, but with different name, e.g. :
+```
+Olympus.S01.1080p.GBR.Blu-ray.AVC.DTS-HD.MA.5.1-PzD
+Olympus S01 1080p GBR Blu-ray AVC DTS-HD MA 5.1-PzD
+
+Prometheus.2012.COMPLETE.UHD.BLURAY-TERMiNAL
+Prometheus.2012.2160p.BluRay.HEVC.DTS-HD.MA.7.1-TERMiNAL
+
+JET PILOT
+Jet Pilot 1957 2in1 1080p Blu-ray AVC DTS-HD MA 2.0-MM
+```
+
+2. one is file, and the other is folder, e.g. :
+```
+Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD/
+Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD.mkv
+```
+
+*  and, stil, if the files in subfolder isn't same, it won't detects and the rescue will still failed.
+
+
 ## Search History
 * Torrents that has been searched will be recorded, they won't bother the trackers for the next process.
 * but when you add new trackers you may want to redo the search, click the `Clear Search History` will delete all the records.
