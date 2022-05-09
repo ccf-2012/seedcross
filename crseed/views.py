@@ -224,7 +224,7 @@ class CrossedTorrentTable(AjaxDatatableView):
     ]
 
     def customize_row(self, row, obj):
-        if obj.name != obj.crossed_with.name:
+        if obj and  obj.name != obj.crossed_with.name:
             row['fixbtn'] = """
                         <a href="#" class="btn btn-outline-primary btn-sm"
                         onclick="var id=this.closest('tr').id.substr(4); $.ajax({url: '/crseed/fix_path/'+ id}); $('#datatable').DataTable().ajax.reload(null, false); return false;">
