@@ -126,14 +126,14 @@ This cross seeding tool works as follows.
 
 1. Get the list of torrents from the downloader, extract the movie name from the torrent title, use Jackett/Prowlarr to search for torrents with the same movie name at each site, (you can't search directly using the file name, you need to strip extra strings and search only for the movie name), and match the information returned by Jackett/Prowlarr by comparing the size.
 2. The torrent download link sent to the downloader, which downloads it via Jackett/Prowlarr
-3. The actual title and file name of the torrent are not known until the .torrent file are downloaded, so if we want to compare whether the torrent is exactly match, the seeds are already on the downloader. currently the croos-seed keep the torrents and only mark whether they match on the ui, and let the user check whether it can be rescued.
+3. The actual title and file name of the torrent are not known until the .torrent file are downloaded, so if we want to compare whether the torrent is exactly match, the torrents are already on the downloader (in pause state). currently the croos-seed keep the torrents and only mark whether they match on the ui, and let the user check whether it can be rescued.
 
 * so it will download and keep some torrent that's not same.
 
 
 ## Notes on the fix
 
-There are sometimes torrents with same content but not in same name, these torrents maybe rescued. In the recent update, I have add a 'Fix' button, to get some of them fixed with symbolink:
+There are sometimes torrents with same content but not in same name, these torrents maybe rescued. In the recent update, I have add a 'Fix' button, to get some of them fixed (with symbolink):
 1. both are files, or both folder, but with different name, e.g. :
 ```
 Olympus.S01.1080p.GBR.Blu-ray.AVC.DTS-HD.MA.5.1-PzD
