@@ -61,7 +61,7 @@ mkdir db
 python manager.py migrate
 
 # create a admin user
-python manager.py createsuperuser
+python manage.py createsuperuser
 ```
 
 * (optional) set db to wal mode, to reduce sqlite3's 'table is locked'.
