@@ -58,7 +58,7 @@ git clone https://github.com/ccf-2012/seedcross.git
 ```sh
 cd seedcross
 mkdir db
-python manager.py migrate
+python manage.py migrate
 
 # create a admin user
 python manage.py createsuperuser
