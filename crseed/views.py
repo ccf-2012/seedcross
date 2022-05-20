@@ -402,8 +402,7 @@ def ajaxDeleteHistory(request, id):
 def setFixed(tor, val):
     # tor.fixed = val
     # tor.save()
-    CrossTorrent.objects.filter(name=tor.name,
-                                root_dir=tor.root_dir).update(fixed=val)
+    CrossTorrent.objects.filter(name=tor.name).update(fixed=val)
 
 
 @login_required
