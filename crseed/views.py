@@ -49,7 +49,8 @@ def settingsView(request):
             config.fc_count = form.cleaned_data['fc_count']
             config.fc_interval = form.cleaned_data['fc_interval']
             config.cyclic_reload = form.cleaned_data['cyclic_reload']
-            config.reload_interval_min = form.cleaned_data['reload_interval_min']
+            config.reload_interval_min = form.cleaned_data[
+                'reload_interval_min']
             config.map_from_path = form.cleaned_data['map_from_path']
             config.map_to_path = form.cleaned_data['map_to_path']
             # TODO: shoud this be configurable
@@ -290,7 +291,6 @@ class SearchHistoryTable(AjaxDatatableView):
         },
     ]
 
-
     def customize_row(self, row, obj):
         row['delbtn'] = """
                     <a href="#" class="btn btn-outline-primary btn-sm"
@@ -348,14 +348,14 @@ def startCrossSeedRoutine():
 
     if not validSettings():
         print('config not ready...')
-        return 
+        return
 
     loadtask = getConfig()
     if loadtask.cyclic_reload:
         if loadtask.reload_interval_min > 1:
             StartTask()
             vname = "proceed_cross_seed"
-            interval = loadtask.reload_interval_min*60
+            interval = loadtask.reload_interval_min * 60
             backgroundCrossSeedTask(repeat=interval, verbose_name=vname)
         else:
             print('interval should > 1')
@@ -397,7 +397,14 @@ def ajaxDeleteHistory(request, id):
     tor = get_object_or_404(SearchedHistory, pk=id)
     tor.delete()
     return JsonResponse({'Deleted': True})
-    
+
+
+def setFixed(tor, val):
+    # tor.fixed = val
+    # tor.save()
+    CrossTorrent.objects.filter(name=tor.name,
+                                root_dir=tor.root_dir).update(fixed=val)
+
 
 @login_required
 def ajaxFixSeedPath(request, id):
@@ -405,14 +412,12 @@ def ajaxFixSeedPath(request, id):
     ret = False
     if not tor.fixed:
         ret = fixSeedPath(tor)
-        print('Fixed: ' + str(ret))
+        print('Fixed: ' + str(ret), tor.name)
         if ret:
-            tor.fixed = True
-            tor.save()
+            setFixed(tor, True)
     else:
         print('already fixed, mark it unfixed. ')
-        tor.fixed = False
-        tor.save()
+        setFixed(tor, False)
 
     # return redirect('cs_list')
     return JsonResponse({'Fixed': ret})
@@ -421,7 +426,7 @@ def ajaxFixSeedPath(request, id):
 def getFirstMediaFile(filePath):
     mediaFiles = getMediaFiles(filePath)
     return mediaFiles[0] if mediaFiles else None
-    
+
 
 def getMediaFiles(filePath):
     types = ('*.mkv', '*.mp4', '*.ts')
@@ -441,16 +446,17 @@ def mapDockerPathToReal(inputPath):
     mapDockerPath = cfg.map_from_path
     mapRealPath = cfg.map_to_path
     if mapDockerPath and inputPath.startswith(mapDockerPath):
-        return inputPath.replace(mapDockerPath,
-                            mapRealPath, 1)
+        return inputPath.replace(mapDockerPath, mapRealPath, 1)
     else:
         return inputPath
+
 
 def fixSeedPath(tor):
     if tor.name == tor.crossed_with.name:
         return False
 
-    srcitem = mapDockerPathToReal(os.path.join(tor.crossed_with.location, tor.crossed_with.name))
+    srcitem = mapDockerPathToReal(
+        os.path.join(tor.crossed_with.location, tor.crossed_with.name))
     destitem = mapDockerPathToReal(os.path.join(tor.location, tor.name))
     # src: xxx.mkv  dest: xxyx.mkv
     if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
@@ -471,5 +477,6 @@ def fixSeedPath(tor):
     # src: xxx.mkv  dest: xxx/
     if isMediaFile(srcitem):
         ensureDir(destitem)
-        return symbolLink(srcitem, os.path.join(destitem, tor.crossed_with.name))
+        return symbolLink(srcitem, os.path.join(destitem,
+                                                tor.crossed_with.name))
     return False
