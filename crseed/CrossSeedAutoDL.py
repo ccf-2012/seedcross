@@ -408,7 +408,6 @@ def downloadResult(dlclient, result, localTor, log):
     log.message(s)
     # Jackett return dlclient.addTorrentUrl(result['Link'], localTor.save_path)
     ret = dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, result.title)
-    time.sleep(2)
     return ret
 
 
@@ -469,6 +468,7 @@ def iterTorrents(dlclient, process_param, log):
         for result in matchingResults:
             if checkTaskCanclled() or log.abort():
                 return
+            time.sleep(2)
             st = downloadResult(dlclient, result, localTor, log)
             if st:
                 print(f'- Success added: {result.title}')
