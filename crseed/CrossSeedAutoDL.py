@@ -468,7 +468,7 @@ def iterTorrents(dlclient, process_param, log):
         for result in matchingResults:
             if checkTaskCanclled() or log.abort():
                 return
-            time.sleep(2)
+            time.sleep(10)
             st = downloadResult(dlclient, result, localTor, log)
             if st:
                 print(f'- Success added: {result.title}')
