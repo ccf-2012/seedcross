@@ -211,3 +211,14 @@ services:
     ports:
       - "8019:8019"
 ```
+
+* a `dockerstart.sh` in seedcross dir
+```sh
+#!/bin/sh
+cd /code/seedcross
+cp -n db_empty/* db/
+python3 manage.py makemigrations && python3 manage.py migrate
+python manage.py process_tasks &
+python manage.py runserver 0.0.0.0:8019
+```
+
