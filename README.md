@@ -170,3 +170,44 @@ Lost.Highway.1997.1080p.BluRay.DD+5.1.x264-LoRD.mkv
 1. Aruba@hutongyouwu 
 2. [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
+
+## Files to build docker
+
+* the dir tree
+```
+.
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── seedcross\
+```
+
+* Dockerfile
+```
+# syntax=docker/dockerfile:1
+FROM python:slim
+ENV PYTHONUNBUFFERED=1
+WORKDIR /code
+COPY seedcross/requirements.txt /code/
+COPY seedcross/dockerstart.sh /code/
+RUN pip install -r requirements.txt
+COPY . /code/
+
+EXPOSE 8019
+ENTRYPOINT ["/code/dockerstart.sh"]
+```
+
+* docker-compose.yml
+```yml
+version: "3.9"
+   
+services:
+  seedcross:
+    build: .
+    command: bash -c "./dockerstart.sh"
+    volumes:
+      - ./seedcross:/code
+      - ./dbdata:/code/seedcross/db
+    ports:
+      - "8019:8019"
+```
