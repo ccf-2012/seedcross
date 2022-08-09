@@ -10,9 +10,9 @@ class ParamSettingForm(forms.Form):
     client_type = forms.ChoiceField(label='Type', choices=CLIENT_TYPES)
     client_host = forms.GenericIPAddressField(label='Host')
     client_port = forms.IntegerField(label='Port')
-    client_username = forms.CharField(label='Username')
+    client_username = forms.CharField(label='Username', required=False)
     client_password = forms.CharField(
-        label='Password', widget=forms.PasswordInput(render_value=True))
+        label='Password', widget=forms.PasswordInput(render_value=True), required=False)
     include_cjk = forms.BooleanField(label='Search CJK title',  required=False)
     category_indexers = forms.BooleanField(label='Category indexers',  required=False)
     indexer_movietv = forms.CharField(label='Movie/TV indexers',  required=False)
