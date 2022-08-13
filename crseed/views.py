@@ -411,7 +411,7 @@ def ajaxFixSeedPath(request, id):
     ret = False
     if not tor.fixed:
         ret = fixSeedPath(tor)
-        print('Fixed: ' + str(ret), tor.name)
+        print(str(ret) + ' : ' + tor.name)
         if ret:
             setFixed(tor, True)
     else:
@@ -457,6 +457,7 @@ def fixSeedPath(tor):
     srcitem = mapDockerPathToReal(
         os.path.join(tor.crossed_with.location, tor.crossed_with.name))
     destitem = mapDockerPathToReal(os.path.join(tor.location, tor.name))
+    print(srcitem, ' ==> ', destitem)
     # src: xxx.mkv  dest: xxyx.mkv
     if isMediaFile(tor.name) and isMediaFile(tor.crossed_with.name):
         return symbolLink(srcitem, destitem)
