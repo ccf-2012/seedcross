@@ -184,7 +184,7 @@ class QbDownloadClient(DownloadClientBase):
     def mkSeedTor(self, tor):
         ltr = 3 if len(tor.trackers) >= 3 else (len(tor.trackers) -1)
         if len(tor.trackers) < 3:
-            print(tor.trackers)
+            print("The Trackers", tor.trackers)
         trackerstr = tor.tracker if len(tor.tracker)>1 else tor.trackers[ltr]["url"]
         st = SeedingTorrent(
             torrent_hash=tor.hash,
@@ -226,14 +226,14 @@ class QbDownloadClient(DownloadClientBase):
         return re.sub(r'\.', ' ', torTitle)
 
     def findJustAdded(self, timestamp):
-        time.sleep(7)
+        time.sleep(3)
         # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
         torList = self.qbClient.torrents_info(category=timestamp)
         # breakpoint()
         if torList:
             print('Added: '+torList[0].name)
+            # time.sleep(1)
             torList[0].set_category(category=None)
-            time.sleep(1)
             self.qbClient.torrents_remove_categories(categories=timestamp)
             return torList[0]
         else:
