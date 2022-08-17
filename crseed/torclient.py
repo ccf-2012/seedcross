@@ -232,8 +232,8 @@ class QbDownloadClient(DownloadClientBase):
         # breakpoint()
         if torList:
             print('Added: '+torList[0].name)
+            # torList[0].set_category(category=None)
             # time.sleep(1)
-            torList[0].set_category(category=None)
             self.qbClient.torrents_remove_categories(categories=timestamp)
             return torList[0]
         else:
