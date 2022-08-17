@@ -182,10 +182,14 @@ class QbDownloadClient(DownloadClientBase):
         return abbrev
 
     def mkSeedTor(self, tor):
-        ltr = 3 if len(tor.trackers) >= 3 else (len(tor.trackers) -1)
-        if len(tor.trackers) < 3:
+        ltr = 3 if len(tor.trackers) >= 4 else (len(tor.trackers) -1)
+        if len(tor.trackers) < 4:
             print("The Trackers", tor.trackers)
-        trackerstr = tor.tracker if len(tor.tracker)>1 else tor.trackers[ltr]["url"]
+        if ltr > 0:
+            trackerstr = tor.tracker if len(tor.tracker)>1 else tor.trackers[ltr]["url"]
+        else:
+            print("No tracker string")
+            trackerstr = 'unknow'
         st = SeedingTorrent(
             torrent_hash=tor.hash,
             name=tor.name,
