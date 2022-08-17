@@ -229,7 +229,7 @@ class QbDownloadClient(DownloadClientBase):
         time.sleep(3)
         # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
         torList = self.qbClient.torrents_info(category=timestamp)
-        breakpoint()
+        # breakpoint()
         if torList:
             print('Added: '+torList[0].name)
             time.sleep(1)
