@@ -483,7 +483,6 @@ def iterTorrents(dlclient, process_param, log):
                 log.inc(download_count=1)
                 log.message('Added: ' + result.title)
                 saveCrossedTorrent(st, dbSearchTor)
-            # else:
-            #     log.message('Maybe existed: ' + localTor.name)
+
 
         time.sleep(FlowControlInterval)
