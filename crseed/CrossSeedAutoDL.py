@@ -255,6 +255,7 @@ class Searcher:
                     infoUrl=result['Details'],
                     size=result['Size'],
                     imdbId=result['Imdb'],
+                    TrackerType=result['TrackerType'],
                 )
             elif self.process_param.jackett_prowlarr == 1:
                 r = IndexResult(
@@ -265,9 +266,13 @@ class Searcher:
                     infoUrl=result['infoUrl'],
                     size=result['size'],
                     imdbId=result['imdbId'],
+                    TrackerType=result['TrackerType'],
                 )
 
-            index_results.append(r)
+            # skipping result if its from a public tracker/indexer
+            if r.TrackerType != "public":
+                index_results.append(r)
+
         return index_results
 
     def _get_matching_results(self, local_release_data, index_result, log):
@@ -300,7 +305,7 @@ class Searcher:
 
 class IndexResult():
     def __init__(self, indexer, categories, title, downloadUrl, infoUrl, size,
-                 imdbId):
+                 imdbId, TrackerType):
         self.indexer = indexer
         self.categories = categories
         self.title = title
@@ -308,6 +313,7 @@ class IndexResult():
         self.infoUrl = infoUrl
         self.size = size
         self.imdbId = imdbId
+        self.TrackerType = TrackerType
 
 
 def categoryMovieTV(category):
@@ -407,7 +413,8 @@ def downloadResult(dlclient, result, localTor, log):
     logger.info(s)
     log.message(s)
     # Jackett return dlclient.addTorrentUrl(result['Link'], localTor.save_path)
-    ret = dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, result.title)
+    # print(result)
+    ret = dlclient.addTorrentUrl(result.downloadUrl, localTor.save_path, result.title, result.indexer)
     return ret
 
 
