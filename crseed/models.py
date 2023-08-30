@@ -103,7 +103,7 @@ class ProcessParam(models.Model):
     cyclic_reload = models.BooleanField(default=False)
     reload_interval_min = models.IntegerField(default=1440)
     last_load = models.DateTimeField(auto_now=True)
-    max_size_difference = models.IntegerField(default=0)
+    max_size_difference = models.IntegerField(default=1024000)
     map_dir = models.BooleanField(default=False)
     map_from_path = models.CharField(max_length=128, default='', null=True)
     map_to_path = models.CharField(max_length=128, default='', null=True)
