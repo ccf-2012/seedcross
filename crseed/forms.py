@@ -28,7 +28,7 @@ class ParamSettingForm(forms.Form):
     fc_interval = forms.IntegerField(label='Flow control: Interval')
     cyclic_reload = forms.BooleanField(label='Cycle run',  required=False)
     reload_interval_min = forms.IntegerField(label='Cycle run interval (minutes)', required=False)
-    max_size_difference = forms.IntegerField(label='Max size difference', required=False)
+    max_size_difference = forms.IntegerField(label='Max size difference (bytes) when compare torrents.', required=False)
     map_from_path = forms.CharField(label='Map From: Download client(QB/Tr/De) path', required=False)
     map_to_path = forms.CharField(label='Map to: seedcross path', required=False)
 
