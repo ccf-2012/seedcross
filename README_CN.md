@@ -5,6 +5,7 @@
 
 
 ## Last update
+* 2023.8.30: 设置中可以设置种子大小容差， max size difference (bytes) when compare torrents
 * 2022.5.5:  `Fix` 功能，可在界面上操作对目录不匹配的种子通过软链(ln -s)作修复，需要下载器和seedcross运行在同一台机器，（或者把目录mount过来）. 对于下载器在docker中的 或 seedcross运行在docker中的，可以设置目录的map.
 * 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
@@ -51,11 +52,18 @@ sudo pip install virtualenv
 # create a virutalenv
 virtualenv  seed
 source seed/bin/activate
+
 ```
 
 * clone the source
 ```sh
 git clone https://github.com/ccf-2012/seedcross.git
+```
+
+* Install the requirements
+```sh
+# install requirements
+pip install -r requirements.txt
 ```
 
 * build the db

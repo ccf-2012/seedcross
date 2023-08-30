@@ -3,6 +3,7 @@
 * based on [CrossSeedAutoDL](https://github.com/BC44/Cross-Seed-AutoDL)
 
 ## Last update
+* 2023.8.30: setting, max size difference (bytes) when compare torrents
 * 2022.5.5:  `Fix` path of crossed torrent to match local path, required your download client is running on the same machine as seedcross. you may set a path map for dockers.
 * 2022.4.29: dev merge to main
 * 2022.3.29: deluge client, download_location => save_path
@@ -48,13 +49,17 @@ sudo pip install virtualenv
 virtualenv  seed
 source seed/bin/activate
 
-# install requirements
-pip install -r requirements.txt
 ```
 
 * clone the source
 ```sh
 git clone https://github.com/ccf-2012/seedcross.git
+```
+
+* Install the requirements
+```sh
+# install requirements
+pip install -r requirements.txt
 ```
 
 * build the db
