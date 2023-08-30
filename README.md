@@ -47,6 +47,9 @@ sudo pip install virtualenv
 # create a virutalenv
 virtualenv  seed
 source seed/bin/activate
+
+# install requirements
+pip install -r requirements.txt
 ```
 
 * clone the source
@@ -57,6 +60,7 @@ git clone https://github.com/ccf-2012/seedcross.git
 * build the db
 ```sh
 cd seedcross
+
 mkdir db
 python manage.py migrate
 
