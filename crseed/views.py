@@ -54,8 +54,8 @@ def settingsView(request):
             config.map_from_path = form.cleaned_data['map_from_path']
             config.map_to_path = form.cleaned_data['map_to_path']
             # TODO: shoud this be configurable
-            config.max_size_difference = 10
-            # config.max_size_difference = form.cleaned_data['max_size_difference']
+            # config.max_size_difference = 10
+            config.max_size_difference = form.cleaned_data['max_size_difference']
 
             client.clienttype = form.cleaned_data['client_type']
             client.host = form.cleaned_data['client_host']
@@ -96,7 +96,7 @@ def settingsView(request):
             "map_from_path": config.map_from_path,
             "map_to_path": config.map_to_path,
             # TODO: shoud this be configurable
-            # "max_size_difference": config.max_size_difference,
+            "max_size_difference": config.max_size_difference,
         })
     return render(request, 'crseed/settings.html', {
         'form': form,

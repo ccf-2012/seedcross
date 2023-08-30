@@ -76,7 +76,7 @@ class ParamSettingForm(forms.Form):
             <p><strong>Search options</strong></p>
             """),
             # TODO: shoud this be configurable
-            # Field('max_size_difference', placeholder="max size difference (in bytes) for extra or missing files, eg. nfo files"),
+            Field('max_size_difference', placeholder="max size difference (in bytes)"),
             Field('include_cjk'),
             Field('category_indexers', id='check_id'),
             Div(
