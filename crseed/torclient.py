@@ -66,16 +66,17 @@ class TrDownloadClient(DownloadClientBase):
             torrent_hash=trTor.hashString,
             name=trTor.name,
             size=trTor.total_size,
-            tracker=self.abbrevTracker(trTor.trackers[0]),
+            tracker=self.abbrevTracker(trTor.fields['trackers'][0]['announce']),
             added_date=trTor.date_added,
             status=trTor.status,
             save_path=trTor.download_dir,
         )
         return st
 
-    def abbrevTracker(self, trackerJson):
-        hostnameList = urllib.parse.urlparse(
-            trackerJson["announce"]).netloc.split('.')
+    def abbrevTracker(self, trackerstr):
+        if len(trackerstr) < 2:
+            return ''
+        hostnameList = urllib.parse.urlparse(trackerstr).netloc.split('.')
         if len(hostnameList) == 2:
             abbrev = hostnameList[0]
         elif len(hostnameList) == 3:
@@ -83,6 +84,17 @@ class TrDownloadClient(DownloadClientBase):
         else:
             abbrev = ''
         return abbrev
+
+    # def abbrevTracker(self, trackerJson):
+    #     hostnameList = urllib.parse.urlparse(
+    #         trackerJson["announce"]).netloc.split('.')
+    #     if len(hostnameList) == 2:
+    #         abbrev = hostnameList[0]
+    #     elif len(hostnameList) == 3:
+    #         abbrev = hostnameList[1]
+    #     else:
+    #         abbrev = ''
+    #     return abbrev
 
     def loadTorrents(self):
         self.trClient = self.connect()
