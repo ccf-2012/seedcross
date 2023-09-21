@@ -247,6 +247,8 @@ class Searcher:
 
         for result in search_results:
             if self.process_param.jackett_prowlarr == 0:
+                if 'Link' not in result:
+                    return []
                 r = IndexResult(
                     indexer=result['Tracker'],
                     categories=result['Category'],
@@ -257,6 +259,8 @@ class Searcher:
                     imdbId=result['Imdb'],
                 )
             elif self.process_param.jackett_prowlarr == 1:
+                if 'downloadUrl' not in result:
+                    return []
                 r = IndexResult(
                     indexer=result['indexer'],
                     categories=result['categories'],
