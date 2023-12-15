@@ -107,7 +107,7 @@ You should have a configured Jackett/Prowlarr server with indexers in place, the
 
 If you want to search specific trackers:
  - Jackett you should find the exact word between `indexers/` and `/results` in the `torznab feed URL`
- - Prowlarr uses an integer number, you can find it from the indexer info by clicking on the Indexer in the list and it is shown under the `Indexer Details`
+ - Prowlarr uses an integer number known as ID within Prowlarr, you can find these from the indexer info. Click on the Indexer in the list and its ID will be shown under the `Indexer Details`
  - These are then entered in a comma separated format e.g `11, 32, 59`
 
 ### Search options
@@ -116,7 +116,7 @@ If you want to search specific trackers:
 
 `Search CJK title` - This will include CJK symbols within the search https://en.wikipedia.org/wiki/CJK_Symbols_and_Punctuation
 
-`Category indexers` - ???
+`Category indexers` (Categorise Indexers) - If enabled you can use the values entered in the Trackers / Indexers: section and assign them to specific categories, this is useful when you don't want to search for TV shows on a Music Tracker. 
 
 ### Flow Control Setting: 
 `Flow control: Count limit:` This option defines how many torrents to search for each cycle, keep in mind that this will search all your defined indexers/trackers so limit this setting to avoid overloading them, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
@@ -138,7 +138,7 @@ After you fill the form, press `Save Settings`, if no error detected, it will re
     1. load the torrents from the download client.
     2. parse the name to get the title,year,episode etc, with these keyword ask Jackett server to search torrents in your pre-configured trackers.
     3. check if there's match by title and size.
-    4. add the download link to the download client, in `paused` state.
+    4. add the download link to the download client, in `paused` state, you will need to 'force recheck' in qBittorrent to scan the files and start seeding.
     5. and Yes, if the configuration haven't been set, it will redirect to the `Settings` page. 
 
 2.  during the process, a progress panel will show up, with:
