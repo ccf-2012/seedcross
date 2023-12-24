@@ -110,7 +110,7 @@ class TrDownloadClient(DownloadClientBase):
             activeList.append(st)
         return activeList
 
-    def addTorrentUrl(self, tor_url, download_location, tor_title):
+    def addTorrentUrl(self, tor_url, download_location, tor_title, indexer):
         if not self.trClient:
             self.connect()
         newtor = None
@@ -264,7 +264,7 @@ class QbDownloadClient(DownloadClientBase):
                 return torList[-1] if torList else None
 
  
-    def addTorrentUrl(self, tor_url, download_location, tor_title):
+    def addTorrentUrl(self, tor_url, download_location, tor_title, indexer):
         if not self.qbClient:
             self.connect()
         st = None
@@ -277,9 +277,12 @@ class QbDownloadClient(DownloadClientBase):
                     is_paused=True,
                     save_path=download_location,
                     use_auto_torrent_management=False,
-                    category=timestamp,
+                    # category=timestamp,
                     # tags=[timestamp],
-                    download_path=download_location )
+                    download_path=download_location,
+                    skip_checking=True,
+                    tags="seedcross," + indexer,
+                    autoTMM=False)
                 # breakpoint()
                 if 'OK' in result.upper():
                     qbTor = self.findJustAdded(timestamp)
@@ -375,7 +378,7 @@ class DeDownloadClient(DownloadClientBase):
                 self.log('Torrent was not added! maybe exists.')
                 return None
 
-    def addTorrentUrl(self, tor_url, download_location, tor_title):
+    def addTorrentUrl(self, tor_url, download_location, tor_title, indexer):
         if not self.deClient:
             self.connect()
         torhash = None
