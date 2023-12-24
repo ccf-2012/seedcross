@@ -91,27 +91,54 @@ chmod +x start.sh
 
 
 ## Login
-1. open `http://<your-ip>:8019` in browser
-2. login with `admin`:`admin`
+Open `http://<your-ip>:8019` in browser
+Login with `admin`:`admin`
 
 ## Settings
-* Start from `Settings` tab, fill the fields carefully:
-1. Download Client Setting: 
-   1. `Type`, `Host`, `Port`, `Username`, `Password` as usual, note the `Host` must be an IP address, not url.
-2. Jackett/Prowlarr Setting: 
-   1. you should have started a proper configured Jackett/Prowlarr server, thus you can get the  `Jackett/Prowlarr Url` and `Jackett/Prowlarr Api key`, 
-   2. Trackers / Indexers: Leave blank if you would seach all the trackers; when you want to search specific trackers, you should find the exact word between `indexers/` and `/results` in the `torznab feed URL` in Jackett; for Prowlarr, it's an integer number, find it from the indexer info.
-3. Flow Control Setting: 
-   1. Flow control: Count limit: every search query will lead load to the tracker server, limit this count as your feel safe, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
-   2. Flow control: Interval: time delay between 2 search query.
-4. After you fill the form, press `Save Settings`, if no error detected, it will redirect to the `Start Cross` page, otherwise there will be error message next to the field.
+Start from `Settings` tab, fill the fields carefully:
+
+### Download Client Setting: 
+Enter the `Type`, `Host`, `Port`, `Username`, `Password`, note the `Host` must be an IP address, not url.
+
+### Jackett/Prowlarr Setting: 
+You should have a configured Jackett/Prowlarr server with indexers in place, the `Jackett/Prowlarr Url` formatted as `http://IP:PORT` and `Jackett/Prowlarr Api key`, 
+
+`Trackers / Indexers:` Leave blank if you would seach all the trackers
+
+If you want to search specific trackers:
+ - Jackett you should find the exact word between `indexers/` and `/results` in the `torznab feed URL`
+ - Prowlarr uses an integer number known as ID within Prowlarr, you can find these from the indexer info. Click on the Indexer in the list and its ID will be shown under the `Indexer Details`
+ - These are then entered in a comma separated format e.g `11, 32, 59`
+
+### Search options
+
+`Max size difference (bytes) when compare torrents.` Some trackers will include an additional text file within a release meaning the size of the torrent is slightly different however, the main file contents are the same, this setting will allow for those torrents to be grabbed. You can adjust this setting if required.
+
+`Search CJK title` - This will include CJK symbols within the search https://en.wikipedia.org/wiki/CJK_Symbols_and_Punctuation
+
+`Category indexers` (Categorise Indexers) - If enabled you can use the values entered in the Trackers / Indexers: section and assign them to specific categories, this is useful when you don't want to search for TV shows on a Music Tracker. 
+
+### Flow Control Setting: 
+`Flow control: Count limit:` This option defines how many torrents to search for each cycle, keep in mind that this will search all your defined indexers/trackers so limit this setting to avoid overloading them, SeedCross will manage the search history and find the next un-searched torrent when you start cross next time.
+
+`Flow control: Interval:` This defines the number of seconds to wait between each search query
+
+### Cycle run options
+
+`Cycle run interval (minutes)` Enabling this option defines how many minutes to wait between each run, meaning SeedCross can be left to automatically perform it's duties without intervention. 
+
+### Fix options
+
+If your download client is running on a different machine to seedcross you can use this option to 'map' the correct paths for SeedCross to use.
+
+After you fill the form, press `Save Settings`, if no error detected, it will redirect to the `Start Cross` page, otherwise there will be error message next to the field.
 
 ## Start Crossing
 1. press `Start Cross` button, seedcross will start to:
     1. load the torrents from the download client.
     2. parse the name to get the title,year,episode etc, with these keyword ask Jackett server to search torrents in your pre-configured trackers.
     3. check if there's match by title and size.
-    4. add the download link to the download client, in `paused` state.
+    4. add the download link to the download client, in `paused` state, you will need to 'force recheck' in qBittorrent to scan the files and start seeding.
     5. and Yes, if the configuration haven't been set, it will redirect to the `Settings` page. 
 
 2.  during the process, a progress panel will show up, with:
@@ -230,4 +257,3 @@ python3 manage.py makemigrations && python3 manage.py migrate
 python manage.py process_tasks &
 python manage.py runserver 0.0.0.0:8019
 ```
-
