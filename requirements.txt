@@ -3,10 +3,9 @@ deluge-client
 Django
 django-ajax-datatable
 django-background-tasks
-django-crispy-forms
+django-crispy-forms==1.14.0
 guessit
 qbittorrent-api
 requests
 transmission-rpc
-urllib3
 pytz
