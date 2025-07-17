@@ -243,22 +243,29 @@ class QbDownloadClient(DownloadClientBase):
 
     def findJustAdded(self, timestamp):
         time.sleep(5)
+        anotherQbClient = qbittorrentapi.Client(
+            host=self.scsetting.host,
+            port=self.scsetting.port,
+            username=self.scsetting.username,
+            password=self.scsetting.password,
+            #   VERIFY_WEBUI_CERTIFICATE = False,
+        )
+        anotherQbClient.auth_log_in()
         # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
-        torList = self.qbClient.torrents_info(category=timestamp)
+        torList = anotherQbClient.torrents_info(category=timestamp)
         # breakpoint()
         if torList:
             print('Added: '+torList[0].name)
             # torList[0].set_category(category=None)
             # time.sleep(1)
-            self.qbClient.torrents_remove_categories(categories=timestamp)
+            anotherQbClient.torrents_remove_categories(categories=timestamp)
             return torList[0]
         else:
             time.sleep(1)
-            torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, )
             print('Added but not found.')
             # torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
-            self.qbClient.torrents_remove_categories(categories=timestamp)
-            return torList[0] if torList else None
+            anotherQbClient.torrents_remove_categories(categories=timestamp)
+            return None
 
  
     def addTorrentUrl(self, tor_url, download_location, tor_title, indexer):
