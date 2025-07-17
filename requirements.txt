@@ -1,9 +1,9 @@
 asgiref
 deluge-client
-Django==3.2.13
+Django
 django-ajax-datatable
 django-background-tasks
-django-crispy-forms==1.14.0
+django-crispy-forms
 guessit
 qbittorrent-api
 requests

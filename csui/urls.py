@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.conf.urls import re_path
+from django.urls import re_path
 from accounts.forms import PasswordChangeCustomForm
 from crseed import views as crview
 
