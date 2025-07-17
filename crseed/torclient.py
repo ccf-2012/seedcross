@@ -289,7 +289,16 @@ class QbDownloadClient(DownloadClientBase):
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
                     else:
-                        self.log('Torrent not added! Maybe exists.')
+                        st = SeedingTorrent(
+                            torrent_hash='',
+                            name=tor_title,
+                            size= -1,
+                            tracker=self.abbrevTracker(tor_url),
+                            added_date=datetime.now(),
+                            status='unknown',
+                            save_path=download_location,
+                        )                        
+                        self.log('Torrent not found in qbit.')
                 else:
                     self.log('Torrent not added! something wrong with qb api ...')
             except Exception as e:
