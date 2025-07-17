@@ -254,14 +254,11 @@ class QbDownloadClient(DownloadClientBase):
             return torList[0]
         else:
             time.sleep(1)
-            self.qbClient.torrents_remove_categories(categories=timestamp)
-            torList = self.qbClient.torrents_info(sort='added_on')
+            torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, )
+            print('Added but not found.')
             # torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
-            if torList:
-                print('Not Added.')
-                return None
-            else:            
-                return torList[-1] if torList else None
+            self.qbClient.torrents_remove_categories(categories=timestamp)
+            return torList[0] if torList else None
 
  
     def addTorrentUrl(self, tor_url, download_location, tor_title, indexer):
