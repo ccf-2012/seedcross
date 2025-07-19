@@ -82,7 +82,7 @@ def backgroundCrossSeedTask():
         if c:
             iterTorrents(dlclient, param, log)
             # Test the downloadResult function
-            test_download_result(dlclient, param, log)
+            # test_download_result(dlclient, param, log)
         else:
             log.message('Connect failed: ' + dlclient.scsetting.host)
     else:
