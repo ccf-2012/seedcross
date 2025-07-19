@@ -252,12 +252,10 @@ class QbDownloadClient(DownloadClientBase):
         )
         anotherQbClient.auth_log_in()
         # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
-        torList = anotherQbClient.torrents_info(category=timestamp)
+        torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
         # breakpoint()
         if torList:
             print('Added: '+torList[0].name)
-            # torList[0].set_category(category=None)
-            # time.sleep(1)
             anotherQbClient.torrents_remove_categories(categories=timestamp)
             return torList[0]
         else:
@@ -276,6 +274,7 @@ class QbDownloadClient(DownloadClientBase):
             try:
                 # curr_added_on = time.time()
                 timestamp = str(int(time.time()))
+                cur_count = self.qbClient.torrents_count()
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
                     is_paused=True,
@@ -287,7 +286,12 @@ class QbDownloadClient(DownloadClientBase):
                     skip_checking=True,
                     tags="seedcross," + indexer,
                     autoTMM=False)
+                new_count = self.qbClient.torrents_count()
                 # breakpoint()
+                # if new_count <= cur_count:
+                #     self.log('Torrent not added, Torrent already in session.')
+                #     return None
+
                 if 'OK' in result.upper():
                     qbTor = self.findJustAdded(timestamp)
                     if qbTor:

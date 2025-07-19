@@ -406,7 +406,6 @@ def saveCrossedTorrent(st, searchTor):
 
 
 def downloadResult(dlclient, result, localTor, log):
-
     # Jackett if result['Link'] is None:
     if result.downloadUrl is None:
         s = 'Skipped: - Skipping release (no download link): ' + localTor.name
@@ -490,4 +489,37 @@ def iterTorrents(dlclient, process_param, log):
 
 
         time.sleep(FlowControlInterval)
+
+
+from torclient import SeedingTorrent
+
+def test_download_result(dlclient, process_param, log):
+    localTor = SeedingTorrent(
+        torrent_hash='testhash123',
+        name='Test Movie',
+        size=1500 * Searcher.MiB,
+        save_path='/path/to/save',
+        tracker='TestTracker',
+        added_date='2023-10-01 12:00:00'
+    )
+    result = IndexResult(
+        indexer='TestIndexer',
+        categories=['Movie'],
+        title='About Endlessness 2019 1080p BluRay DTS x264-HDS',
+        downloadUrl='http://192.168.5.8:9117/dl/mteamtp/?jackett_apikey=NqTlUwWml2WU1UQ05FcjhrcHd3&file=About+Endlessness+2019+1080p+BluRay+DTS+x264-HDS',
+        infoUrl='https://kp.m-team.cc/detail/624943',
+        size=5150 * Searcher.MiB,
+        imdbId='',
+        TrackerType='private'
+    )
+    st = downloadResult(dlclient, result, localTor, log)
+    if st:
+        print(f'- Success added: {result.title}')
+        logger.info(f'- Success added: {result.title}')
+        log.inc(download_count=1)
+        log.message('Added: ' + result.title)
+    else:
+        print(f'- Failed to add: {result.title}')
+        logger.info(f'- Failed to add: {result.title}')
+        log.message('Failed to add: ' + result.title, error_abort=1)
 

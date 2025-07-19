@@ -1,7 +1,7 @@
 from background_task import background
 from background_task.models import Task
 from crseed.models import ProcessLog
-from crseed.CrossSeedAutoDL import iterTorrents, checkTaskCanclled
+from crseed.CrossSeedAutoDL import iterTorrents, checkTaskCanclled, test_download_result
 from .torclient import getDownloadClient
 from . import views as crview
 from django.utils import timezone
@@ -81,6 +81,8 @@ def backgroundCrossSeedTask():
         c = dlclient.connect()
         if c:
             iterTorrents(dlclient, param, log)
+            # Test the downloadResult function
+            test_download_result(dlclient, param, log)
         else:
             log.message('Connect failed: ' + dlclient.scsetting.host)
     else:
