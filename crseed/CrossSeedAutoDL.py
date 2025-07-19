@@ -3,12 +3,15 @@ import logging
 import re
 import requests
 import time
+from datetime import datetime  # 添加此行
+import pytz  # 添加此行
 from guessit import guessit
 from urllib.parse import urlencode
 
 from .torcategory import GuessCategoryUtils
 from .tortitle import parseMovieName
 from .models import CrossTorrent, TaskControl, SearchedHistory
+from .torclient import SeedingTorrent
 
 logger = logging.getLogger(__name__)
 
@@ -491,8 +494,6 @@ def iterTorrents(dlclient, process_param, log):
         time.sleep(FlowControlInterval)
 
 
-from torclient import SeedingTorrent
-
 def test_download_result(dlclient, process_param, log):
     localTor = SeedingTorrent(
         torrent_hash='testhash123',
@@ -500,7 +501,8 @@ def test_download_result(dlclient, process_param, log):
         size=1500 * Searcher.MiB,
         save_path='/path/to/save',
         tracker='TestTracker',
-        added_date='2023-10-01 12:00:00'
+        added_date=datetime.now(pytz.utc),  # 需要导入 datetime 和 pytz
+        status='seeding'  # 添加 status 字段
     )
     result = IndexResult(
         indexer='TestIndexer',
