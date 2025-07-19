@@ -242,7 +242,7 @@ class QbDownloadClient(DownloadClientBase):
         return re.sub(r'\.', ' ', torTitle)
 
     def findJustAdded(self, timestamp):
-        time.sleep(5)
+        time.sleep(15)
         anotherQbClient = qbittorrentapi.Client(
             host=self.scsetting.host,
             port=self.scsetting.port,
@@ -251,16 +251,16 @@ class QbDownloadClient(DownloadClientBase):
             #   VERIFY_WEBUI_CERTIFICATE = False,
         )
         anotherQbClient.auth_log_in()
+        # maindata = anotherQbClient.sync.maindata(rid="...")
         # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
         torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
         # breakpoint()
         if torList:
-            print('Added: '+torList[0].name)
+            self.log('Added: '+torList[0].name)
             anotherQbClient.torrents_remove_categories(categories=timestamp)
             return torList[0]
         else:
-            time.sleep(1)
-            print('Added but not found.')
+            self.log('Added but not found in qbit.')
             # torList = self.qbClient.torrents_info(status_filter='paused', sort='added_on')
             anotherQbClient.torrents_remove_categories(categories=timestamp)
             return None
@@ -305,10 +305,10 @@ class QbDownloadClient(DownloadClientBase):
                             added_date=datetime.now(),
                             status='unknown',
                             save_path=download_location,
-                        )                        
-                        self.log('Torrent not found in qbit.')
+                        )
+                        self.log('Torrent not found in qbit, a temporary item is added in the view.')
                 else:
-                    self.log('Torrent not added! something wrong with qb api ...')
+                    self.log('Torrent not added! something wrong with qb connection ...')
             except Exception as e:
                 self.log('Torrent not added! Torrent already in session.')
                 return None
