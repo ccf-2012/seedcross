@@ -14,7 +14,7 @@ from abc import abstractmethod, ABCMeta
 logger = logging.getLogger(__name__)
 
 
-MAX_RETRIES = 10
+MAX_RETRIES = 5
 def getDownloadClient(scsetting, log=None):
     if scsetting.clienttype == 'qb':
         scobj = QbDownloadClient(scsetting, log)
@@ -302,7 +302,7 @@ class QbDownloadClient(DownloadClientBase):
                 #     return None
 
                 if 'OK' in result.upper():
-                    time.sleep(5)
+                    time.sleep(15)
                     qbTor = self.findJustAdded(timestamp, torcount)
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
