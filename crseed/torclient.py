@@ -251,18 +251,18 @@ class QbDownloadClient(DownloadClientBase):
             #   VERIFY_WEBUI_CERTIFICATE = False,
         )
         anotherQbClient.auth_log_in()
-        newcount = anotherQbClient.torrents_count()
+        # newcount = anotherQbClient.torrents_count()
         retrycount = 0
-        while (newcount <= torcount) and (retrycount < MAX_RETRIES):
+        torList = []
+        while (len(torList) < 1) and (retrycount < MAX_RETRIES):
             time.sleep(5)
+            torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
             self.log('Waiting for qbit to add the torrent, retrying...'+str(retrycount))
-            newcount = anotherQbClient.torrents_count()
             retrycount += 1
         if retrycount >= MAX_RETRIES:
             self.log('Retry count exceeded, torrent added but not found in qbit..')
             return None
         
-        torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
         # breakpoint()
         if torList:
             self.log('Added and found in qbit: '+torList[0].name)
