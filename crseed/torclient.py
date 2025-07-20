@@ -14,6 +14,7 @@ from abc import abstractmethod, ABCMeta
 logger = logging.getLogger(__name__)
 
 
+MAX_RETRIES = 10
 def getDownloadClient(scsetting, log=None):
     if scsetting.clienttype == 'qb':
         scobj = QbDownloadClient(scsetting, log)
@@ -241,8 +242,7 @@ class QbDownloadClient(DownloadClientBase):
         torTitle = self.cutExt(torTitle)
         return re.sub(r'\.', ' ', torTitle)
 
-    def findJustAdded(self, timestamp):
-        time.sleep(15)
+    def findJustAdded(self, timestamp, torcount):
         anotherQbClient = qbittorrentapi.Client(
             host=self.scsetting.host,
             port=self.scsetting.port,
@@ -251,8 +251,16 @@ class QbDownloadClient(DownloadClientBase):
             #   VERIFY_WEBUI_CERTIFICATE = False,
         )
         anotherQbClient.auth_log_in()
-        # maindata = anotherQbClient.sync.maindata(rid="...")
-        # torList = self.qbClient.torrents_info(sort='added_on', limit=1, reverse=True, tag=timestamp)
+        newcount = anotherQbClient.torrents_count()
+        retrycount = 0
+        while newcount <= torcount and retrycount < MAX_RETRIES:
+            time.sleep(5)
+            newcount = anotherQbClient.torrents_count()
+            retrycount += 1
+        if retrycount >= MAX_RETRIES:
+            self.log('Retry count exceeded, something wrong with qbit connection.')
+            return None
+        
         torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
         # breakpoint()
         if torList:
@@ -274,7 +282,6 @@ class QbDownloadClient(DownloadClientBase):
             try:
                 # curr_added_on = time.time()
                 timestamp = str(int(time.time()))
-                cur_count = self.qbClient.torrents_count()
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
                     is_paused=True,
@@ -286,14 +293,16 @@ class QbDownloadClient(DownloadClientBase):
                     skip_checking=True,
                     tags="seedcross," + indexer,
                     autoTMM=False)
-                new_count = self.qbClient.torrents_count()
+                # new_count = self.qbClient.torrents_count()
                 # breakpoint()
                 # if new_count <= cur_count:
                 #     self.log('Torrent not added, Torrent already in session.')
                 #     return None
 
                 if 'OK' in result.upper():
-                    qbTor = self.findJustAdded(timestamp)
+                    time.sleep(10)
+                    torcount = self.qbClient.torrents_count()
+                    qbTor = self.findJustAdded(timestamp, torcount)
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
                     else:
