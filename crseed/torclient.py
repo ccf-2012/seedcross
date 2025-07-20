@@ -259,7 +259,7 @@ class QbDownloadClient(DownloadClientBase):
             newcount = anotherQbClient.torrents_count()
             retrycount += 1
         if retrycount >= MAX_RETRIES:
-            self.log('Retry count exceeded, something wrong with qbit connection.')
+            self.log('Retry count exceeded, torrent added but not found in qbit..')
             return None
         
         torList = anotherQbClient.torrents_info(status_filter='all', category=timestamp)
@@ -302,7 +302,7 @@ class QbDownloadClient(DownloadClientBase):
                 #     return None
 
                 if 'OK' in result.upper():
-                    time.sleep(15)
+                    time.sleep(5)
                     qbTor = self.findJustAdded(timestamp, torcount)
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
