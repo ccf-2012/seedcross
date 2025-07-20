@@ -253,8 +253,9 @@ class QbDownloadClient(DownloadClientBase):
         anotherQbClient.auth_log_in()
         newcount = anotherQbClient.torrents_count()
         retrycount = 0
-        while newcount <= torcount and retrycount < MAX_RETRIES:
+        while newcount < torcount and retrycount < MAX_RETRIES:
             time.sleep(5)
+            self.log('Waiting for qbit to add the torrent, retrying...'+str(retrycount))
             newcount = anotherQbClient.torrents_count()
             retrycount += 1
         if retrycount >= MAX_RETRIES:
@@ -281,6 +282,7 @@ class QbDownloadClient(DownloadClientBase):
         if self.qbClient:
             try:
                 # curr_added_on = time.time()
+                torcount = self.qbClient.torrents_count()
                 timestamp = str(int(time.time()))
                 result = self.qbClient.torrents_add(
                     urls=tor_url,
@@ -300,8 +302,7 @@ class QbDownloadClient(DownloadClientBase):
                 #     return None
 
                 if 'OK' in result.upper():
-                    time.sleep(10)
-                    torcount = self.qbClient.torrents_count()
+                    time.sleep(15)
                     qbTor = self.findJustAdded(timestamp, torcount)
                     if qbTor:
                         st = self.mkSeedTor(qbTor)
