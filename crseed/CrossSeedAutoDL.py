@@ -273,7 +273,7 @@ class Searcher:
                     infoUrl=result['infoUrl'],
                     size=result['size'],
                     imdbId=result['imdbId'],
-                    TrackerType=result['TrackerType'],
+                    # TrackerType=result['TrackerType'],
                 )
 
             # skipping result if its from a public tracker/indexer
