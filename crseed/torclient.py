@@ -253,7 +253,7 @@ class QbDownloadClient(DownloadClientBase):
         anotherQbClient.auth_log_in()
         newcount = anotherQbClient.torrents_count()
         retrycount = 0
-        while newcount < torcount and retrycount < MAX_RETRIES:
+        while (newcount <= torcount) and (retrycount < MAX_RETRIES):
             time.sleep(5)
             self.log('Waiting for qbit to add the torrent, retrying...'+str(retrycount))
             newcount = anotherQbClient.torrents_count()
