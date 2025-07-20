@@ -484,10 +484,9 @@ def iterTorrents(dlclient, process_param, log):
             time.sleep(10)
             st = downloadResult(dlclient, result, localTor, log)
             if st:
-                print(f'- Success added: {result.title}')
-                logger.info(f'- Success added: {result.title}')
+                # logger.info(f'- Torrent added: {result.title}')
                 log.inc(download_count=1)
-                log.message('Success Added: ' + result.title)
+                # log.message('Torrent Added: ' + result.title)
                 saveCrossedTorrent(st, dbSearchTor)
 
 
