@@ -7,6 +7,7 @@ from datetime import datetime  # 添加此行
 import pytz  # 添加此行
 from guessit import guessit
 from urllib.parse import urlencode
+import xml.etree.ElementTree as ET
 
 from .torcategory import GuessCategoryUtils
 from .tortitle import parseMovieName
@@ -39,6 +40,41 @@ class Searcher:
         self.process_param = process_param
         # TODO: shoud this be configurable
         self.max_size_difference = process_param.max_size_difference
+        self.indexer_caps = self._get_jackett_indexer_caps()
+
+    def _get_jackett_indexer_caps(self):
+        """
+        Gets and caches the capabilities of configured Jackett indexers.
+        """
+        if self.process_param.jackett_prowlarr != 0:
+            return {}
+
+        base_url = self.process_param.jackett_url.strip('/') + '/api/v2.0/indexers'
+        params = {'apikey': self.process_param.jackett_api_key, '_': int(time.time() * 1000), 'configured': 'true'}
+        
+        try:
+            resp = requests.get(base_url, params=params, timeout=15)
+            resp.raise_for_status()
+            root = ET.fromstring(resp.content)
+            caps = {}
+            for indexer in root.findall('indexer'):
+                indexer_id = indexer.get('id')
+                if not indexer_id:
+                    continue
+                
+                supports_tv = False
+                caps_node = indexer.find('caps')
+                if caps_node is not None:
+                    for cat in caps_node.findall('category'):
+                        if cat.get('id').startswith('5'): # TV categories are 5xxx
+                            supports_tv = True
+                            break
+                caps[indexer_id] = {'supports_tv': supports_tv}
+            logger.info(f"Successfully fetched capabilities for {len(caps)} Jackett indexers.")
+            return caps
+        except (requests.exceptions.RequestException, ET.ParseError) as e:
+            logger.error(f"Failed to get and parse Jackett indexer capabilities: {e}")
+            return {}
 
     def search(self, local_release_data, log, guess_cat=''):
         if local_release_data['size'] is None:
@@ -64,7 +100,7 @@ class Searcher:
 
         if not search_url:
             log.message(
-                'Skip, No indexer configured for [ {} ] category'.format(guess_cat))
+                'Skip, No indexer configured for [ {} ] category or no suitable indexer found.'.format(guess_cat))
             return []
 
         logger.info(search_url)
@@ -72,7 +108,7 @@ class Searcher:
         resp = None
         for n in range(2):
             try:
-                resp = requests.get(search_url, local_release_data)
+                resp = requests.get(search_url)
                 break
             except requests.exceptions.ReadTimeout:
                 if n == 0:
@@ -102,6 +138,12 @@ class Searcher:
             return []
 
         if self.process_param.jackett_prowlarr == 0:
+            if 'Indexers' not in resp_json:
+                info = 'ERROR: Unexpected response from Jackett. "Indexers" key not found.'
+                logger.info(info)
+                logger.info(resp.text)
+                log.message(info, error_abort=1)
+                return []
             if resp_json['Indexers'] == []:
                 info = 'ERROR: No results found due to incorrectly input indexer names ({}). Check ' \
                        'your spelling/capitalization. Are they added to Jackett? Exiting...'.format(
@@ -126,6 +168,12 @@ class Searcher:
             'apikey': self.process_param.jackett_api_key,
             'query': search_query
         }
+        if categoryMovie(category):
+            optional_params = {
+                'category':
+                Searcher.category_types[local_release_data['guessed_data']
+                                        ['type']],
+            }
 
         if categoryMovieTV(category):
             optional_params = {
@@ -188,6 +236,8 @@ class Searcher:
         }
 
         optional_params = {}
+        is_tv_search = local_release_data['guessed_data']['type'] == 'episode'
+
         if categoryMovieTV(category):
             optional_params = {
                 'Category[]':
@@ -199,38 +249,54 @@ class Searcher:
                 local_release_data['guessed_data'].get('episode')
             }
 
-        indexerUrl = None
+        trackers_str = None
         if self.process_param.category_indexers and category:
             if categoryMovieTV(category):
                 if self.process_param.indexer_movietv.strip():
-                    indexerUrl = self.process_param.indexer_movietv
+                    trackers_str = self.process_param.indexer_movietv
             elif categoryMusic(category):
                 if self.process_param.indexer_music.strip():
-                    indexerUrl = self.process_param.indexer_music
+                    trackers_str = self.process_param.indexer_music
             elif categoryAudio(category):
                 if self.process_param.indexer_audio.strip():
-                    indexerUrl = self.process_param.indexer_audio
+                    trackers_str = self.process_param.indexer_audio
             elif categoryEBook(category):
                 if self.process_param.indexer_ebook.strip():
-                    indexerUrl = self.process_param.indexer_ebook
+                    trackers_str = self.process_param.indexer_ebook
             elif categoryOther(category):
                 if self.process_param.indexer_other.strip():
-                    indexerUrl = self.process_param.indexer_other
-
-            if indexerUrl:
-                optional_params['Tracker[]'] = indexerUrl
-            else:
-                return None
+                    trackers_str = self.process_param.indexer_other
         else:
             if self.process_param.trackers.strip():
-                indexerUrl = self.process_param.trackers
-                optional_params['Tracker[]'] = indexerUrl
+                trackers_str = self.process_param.trackers
 
+        if not trackers_str and self.process_param.category_indexers:
+            return None
+
+        final_trackers = []
+        if trackers_str:
+            trackers = [t.strip() for t in trackers_str.split(',')]
+            if is_tv_search and self.indexer_caps:
+                for tracker in trackers:
+                    if self.indexer_caps.get(tracker, {}).get('supports_tv'):
+                        final_trackers.append(tracker)
+                if not final_trackers:
+                    logger.info(f"Skipping TV search for '{search_query}' as no configured indexers support TV.")
+                    return None
+            else:
+                final_trackers = trackers
+        
         for param, arg in optional_params.items():
             if arg is not None:
                 main_params[param] = arg
+        
+        url = base_url + urlencode(main_params)
 
-        return base_url + urlencode(main_params)
+        if final_trackers:
+            tracker_params = "&".join([f"Tracker[]={tracker}" for tracker in final_trackers])
+            url += "&" + tracker_params
+
+        return url
 
     # some titles in jackett search results get extra data appended in square brackets,
     # ie. 'Movie.Name.720p.x264 [Golden Popcorn / 720p / x264]'
@@ -322,6 +388,9 @@ class IndexResult():
         self.imdbId = imdbId
         self.TrackerType = TrackerType
 
+
+def categoryMovie(category):
+    return category in ['MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K', 'MovieDVD', 'MovieWeb4K', 'MovieRemux', 'Movie4K']
 
 def categoryMovieTV(category):
     return category in ['TV', 'MovieEncode', 'MovieWebdl', 'MovieBDMV', 'MovieBDMV4K', 'MovieDVD', 'MovieWeb4K', 'MovieRemux', 'HDTV', 'Movie4K', 'MV']
